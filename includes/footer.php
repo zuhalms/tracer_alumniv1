@@ -10,7 +10,7 @@
     letter-spacing: .2px;
     box-shadow: 0 -2px 14px rgba(23,75,29,.10);
     margin-top: auto;">
-    &copy; <?= date('Y') ?> Tracer Alumni Jurusan Teknik Informatika  — Universitas Islam Negeri Alauddin Makassar.
+    &copy; <?= date('Y') ?> Tracer Alumni IKPM Gontor Sulawesi Selatan - Sulawesi Barat. 
     <br>
     <span style="font-size:.98rem;font-weight:400;"></span>
 </footer>

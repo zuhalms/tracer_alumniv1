@@ -6,7 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
 <!DOCTYPE html>
 <html lang="id">
 <head>
-         <link rel="icon" type="image/png" href="assets/logo-uin.png">
+    <link rel="icon" type="image/png" href="assets/logo-ikpm2.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title><?= isset($title) ? htmlspecialchars($title) : 'Tracer Alumni Kampus' ?></title>
@@ -25,20 +25,26 @@ if (session_status() == PHP_SESSION_NONE) {
             padding-top: 18px;
             padding-bottom: 0;
         }
+        /* Penyesuaian agar logo dan teks sejajar tengah (vertikal) */
         .brand-logo {
             display: flex;
-            align-items: center;
+            align-items: center; 
         }
         .brand-logo img {
-            width: 44px;
-            margin-right: 10px;
+            width: 70px;
+            height: auto;
+            margin-right: 15px; /* Jarak antara logo dan teks */
         }
         .brand-title {
             font-weight: 700;
             font-size: 1.2rem;
             letter-spacing: .5px;
             color: #fff;
-            line-height: 1.1;
+            line-height: 1.2; /* Mengatur jarak antar baris teks agar lebih rapi */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-top: 10px; /* Sedikit penyesuaian vertikal agar lebih pas */
         }
         .navbar-nav .nav-link {
             color: #d4ffe9 !important;
@@ -53,7 +59,7 @@ if (session_status() == PHP_SESSION_NONE) {
         }
         @media (max-width: 800px) {
             .brand-title { font-size: 1rem; }
-            .brand-logo img { width: 32px;}
+            .brand-logo img { width: 45px; } /* Ukuran sedikit disesuaikan agar tetap terlihat proporsional di HP */
         }
         .container-main {
             padding-top: 68px;
@@ -65,10 +71,10 @@ if (session_status() == PHP_SESSION_NONE) {
 <nav class="navbar main-navbar navbar-expand-lg">
     <div class="container">
         <div class="brand-logo">
-            <img src="assets/logo-uin.png" alt="Logo UIN" />
-            <div>
-                <span class="brand-title">TRACER ALUMNI Jurusan Teknik Informatika<br>
-                    <span style="font-size:.85rem;font-weight:400;">Universitas Islam Negeri Alauddin Makassar</span></span>
+            <img src="assets/logo-ikpm2.png" alt="Logo IKPM Gontor" />
+            <div class="brand-title">
+                <span>TRACER ALUMNI IKPM GONTOR</span>
+                <span style="font-size:.85rem;font-weight:400;">Sulawesi Selatan & Sulawesi Barat</span>
             </div>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavMain">
@@ -84,6 +90,7 @@ if (session_status() == PHP_SESSION_NONE) {
                     <li class="nav-item"><a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
                 <?php else: ?>
                     <li class="nav-item"><a class="nav-link" href="login.php"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="berita.php"><i class="bi bi-newspaper"></i> Berita</a></li>
                     <li class="nav-item"><a class="nav-link" href="register.php"><i class="bi bi-pencil-square"></i> Registrasi</a></li>
                     <li class="nav-item"><a class="nav-link" href="admin/login_admin.php"><i class="bi bi-shield-lock"></i> Admin</a></li>
                 <?php endif; ?>

@@ -2,7 +2,7 @@
 $server = "localhost";
 $username = "root";
 $password = "";
-$database = "tracer_alumni_kampus";
+$database = "db_tracer_ikpm";
 
 // Membuat koneksi ke database
 $conn = mysqli_connect($server, $username, $password, $database);

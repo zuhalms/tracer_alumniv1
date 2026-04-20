@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <link rel="icon" type="image/png" href="assets/logo-uin.png">
+    <link rel="icon" type="image/png" href="assets/logo-ikpm2.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tracer Alumni | Smart & Green Campus</title>
+    <title>Tracer Alumni | IKPM Gontor </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
     <style>
@@ -16,6 +16,30 @@
             position: relative;
             overflow-x: hidden;
         }
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(6px);
+            opacity: 0.16;
+        }
+        body::before {
+            width: 320px;
+            height: 320px;
+            top: -80px;
+            right: -90px;
+            background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%);
+        }
+        body::after {
+            width: 260px;
+            height: 260px;
+            left: -70px;
+            bottom: -80px;
+            background: radial-gradient(circle, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 72%);
+        }
         .main-navbar {
             background: transparent;
             box-shadow: none;
@@ -23,19 +47,35 @@
             padding-bottom: 0;
             z-index: 2;
             position: relative;
+            backdrop-filter: blur(6px);
         }
+        /* Penyesuaian agar logo dan teks sejajar sempurna */
         .brand-logo {
             display: flex;
             align-items: center;
         }
         .brand-logo img {
-            width: 48px;
-            margin-right: 12px;
+            width: 80px; /* Ukuran disesuaikan agar proporsional */
+            height: auto;
+            margin-right: 15px;
+        }
+        .brand-title-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-top: 15px; /* Menurunkan teks sedikit agar sejajar tengah logo */
         }
         .brand-title {
             font-weight: 700;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             letter-spacing: .5px;
+            line-height: 1.2;
+            color: #fff;
+        }
+        .brand-subtitle {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: #e4ffe6;
         }
         .main-nav .nav-link {
             color: #e4ffe6 !important;
@@ -60,7 +100,18 @@
             z-index: 1;
             padding-bottom: 40px;
         }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            inset: 12% 8% auto 8%;
+            height: 320px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
+            box-shadow: 0 18px 60px rgba(20, 78, 36, 0.08);
+            z-index: 0;
+        }
 
+        /* Update Watermark ke Logo IKPM */
         .hero-bg-watermark {
             position: absolute;
             left: 50%;
@@ -68,27 +119,21 @@
             transform: translate(-50%, -50%);
             width: 400px;
             max-width: 90vw;
-            opacity: 0.25;
+            opacity: 0.15; /* Lebih tipis agar teks terbaca */
             z-index: 0;
             user-select: none;
             pointer-events: none;
+            animation: watermarkFloat 7s ease-in-out infinite;
         }
 
-        @media (max-width: 720px) {
-            .hero-bg-watermark {
-                width: 180px;
-            }
+        @media (max-width: 800px) {
+            .brand-title { font-size: 1rem; }
+            .brand-subtitle { font-size: 0.75rem; }
+            .brand-logo img { width: 50px; }
+            .hero-title { font-size: 1.8rem;}
+            .hero-bg-watermark { width: 220px; }
         }
 
-        .sub-headline {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #ddfff9;
-            letter-spacing: 0.6px;
-            z-index: 2;
-            position: relative;
-            margin-bottom: 0.25rem;
-        }
         .hero-title {
             font-size: 2.8rem;
             font-weight: 900;
@@ -97,16 +142,18 @@
             z-index: 2;
             position: relative;
             margin-bottom: 0.6rem;
+            animation: fadeUp 0.7s ease both;
         }
         .subtitle {
             margin: 0 auto 1.7rem auto;
-            font-size: 1.15rem;
-            max-width: 570px;
+            font-size: 1.1rem;
+            max-width: 650px;
             color: #e6ffe8;
             font-weight: 400;
             z-index: 2;
             position: relative;
-            text-shadow: 0 1px 6px rgba(44,51,49,0.13);
+            line-height: 1.6;
+            animation: fadeUp 0.85s ease both;
         }
         .hero-section .btn-main {
             margin-top: 1.35rem;
@@ -118,29 +165,17 @@
             border: none;
             border-radius: 2rem;
             box-shadow: 0 6px 36px rgba(40,150,80,0.13);
-            transition: all 0.15s;
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
             z-index: 2;
             position: relative;
+            animation: fadeUp 1s ease both;
         }
         .hero-section .btn-main:hover {
             background: #e8ffe4;
-            color: #1e8449 !important;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 42px rgba(40,150,80,0.2);
         }
-        .campus-foot {
-            margin-top: 40px;
-            opacity: 0.12;
-            font-size: 2rem;
-            letter-spacing: 2px;
-            font-weight: 800;
-            z-index: 2;
-            position: relative;
-        }
-
-        @media (max-width: 800px) {
-            .hero-title { font-size: 1.45rem;}
-            .campus-foot { font-size: 1rem; }
-            .subtitle { font-size: 1rem; }
-        }
+        
         .card-section {
             margin-top: 3rem;
             margin-bottom: 2.2rem;
@@ -151,21 +186,49 @@
             border-radius: 14px;
             color: #fff;
             box-shadow: 0 2px 14px rgba(37, 90, 51, 0.13);
-            transition: transform 0.18s, box-shadow 0.18s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            animation: fadeUp 1.05s ease both;
         }
         .card-feature:hover {
-            transform: translateY(-7px) scale(1.03);
-            box-shadow: 0 10px 32px rgba(37,90,51,0.23);
+            transform: translateY(-8px);
+            box-shadow: 0 14px 34px rgba(37,90,51,0.24);
+            background: rgba(255,255,255,0.12);
         }
-        .card-feature h4 { font-weight: 700; }
-        .card-feature p { color: #def7e4; }
         footer {
             background: transparent;
             color: #e7ffe7;
-            font-size: 1rem;
+            font-size: 0.9rem;
             text-align: center;
-            padding: 25px 0 10px 0;
+            padding: 25px 0;
             font-weight: 500;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes watermarkFloat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -52%) scale(1.03); }
+        }
+
+        .card-section .col-lg-4:nth-child(1) .card-feature { animation-delay: 0.15s; }
+        .card-section .col-lg-4:nth-child(2) .card-feature { animation-delay: 0.3s; }
+        .card-section .col-lg-4:nth-child(3) .card-feature { animation-delay: 0.45s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
         }
     </style>
 </head>
@@ -173,10 +236,10 @@
     <nav class="navbar main-navbar navbar-expand-lg">
         <div class="container">
             <div class="brand-logo">
-                <img src="assets/logo-uin.png" alt="Logo UIN" />
-                <div>
-                    <span class="brand-title">TRACER ALUMNI  Teknik Informatika</span><br>
-                    <small>Universitas Islam Negeri Alauddin Makassar</small>
+                <img src="assets/logo-ikpm2.png" alt="Logo IKPM" />
+                <div class="brand-title-container">
+                    <span class="brand-title">TRACER ALUMNI IKPM GONTOR</span>
+                    <span class="brand-subtitle"> Wilayah Sulawesi Selatan & Sulawesi Barat</span>
                 </div>
             </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -184,7 +247,8 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end main-nav" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link active" href="#">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="index.php">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="berita.php">Berita</a></li>
                     <li class="nav-item"><a class="nav-link" href="login.php">Login Alumni</a></li>
                     <li class="nav-item"><a class="nav-link" href="register.php">Registrasi</a></li>
                     <li class="nav-item"><a class="nav-link" href="admin/login_admin.php">Admin</a></li>
@@ -194,15 +258,11 @@
     </nav>
 
     <main class="hero-section">
-        <!-- Logo watermark besar, benar2 di tengah, pudar -->
-        <img src="assets/logo-uin.png" class="hero-bg-watermark" alt="Watermark UIN"/>
-        
         <h1 class="hero-title">Tracer Alumni</h1>
         <div class="subtitle">
-            Platform pelacakan dan evaluasi alumni untuk mendukung efisiensi, keberlanjutan, serta perbaikan kualitas pendidikan di lingkungan Jurusan Teknik Informatika.
+            Platform pendataan dan pemetaan kiprah alumni untuk mendukung sinergi potensi, keberlanjutan program kerja, serta penguatan jaringan ukhuwwah di lingkungan keluarga besar IKPM Gontor Sulawesi Selatan & Barat.
         </div>
-        <a href="login.php" class="btn btn-main shadow">Masuk ke Sistem</a>
-        <div class="campus-foot"></div>
+        <a href="login.php" class="btn btn-main">Masuk ke Sistem</a>
     </main>
 
     <section class="container card-section">
@@ -210,26 +270,26 @@
             <div class="col-lg-4 col-md-6">
                 <div class="card card-feature h-100 p-4 text-center">
                     <h4>📝 Registrasi Mudah</h4>
-                    <p>Daftar sebagai alumni hanya dengan beberapa klik, data langsung tersimpan, tanpa perlu verifikasi manual.</p>
+                    <p>Daftar sebagai alumni IKPM hanya dengan beberapa langkah mudah. Data Anda akan langsung terintegrasi dalam database wilayah.</p>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="card card-feature h-100 p-4 text-center">
-                    <h4>📊 Isi Kuesioner</h4>
-                    <p>Kuesioner tracer alumni berbasis data, mendukung kebutuhan jurusan untuk pelaporan dan pembenahan kualitas.</p>
+                    <h4>📊 Tajdidul Ma'lumat</h4>
+                    <p>Pendataan kuesioner dirancang untuk memetakan potensi alumni sebagai pondasi utama dalam merancang program kerja dan kegiatan strategis IKPM ke depan.</p>
                 </div>
             </div>
             <div class="col-lg-4 col-md-12">
                 <div class="card card-feature h-100 p-4 text-center">
-                    <h4>📈 Laporan Modern</h4>
-                    <p>Admin dapat melakukan monitoring dan evaluasi alumni untuk mendukung program Smart & Green Campus.</p>
+                    <h4>📈 Sinergi Potensi</h4>
+                    <p>Memudahkan organisasi dalam melakukan monitoring dan evaluasi alumni untuk mendukung agenda pemberdayaan di setiap daerah.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <footer>
-        &copy; <?= date('Y') ?> Tracer Alumni Jurusan Teknik Informatika – Universitas Islam Negeri Alauddin Makassar. 
+        &copy; <?= date('Y') ?> Tracer Alumni IKPM Gontor Sulselbar. All Rights Reserved.
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

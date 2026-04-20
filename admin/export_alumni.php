@@ -1,68 +1,92 @@
 <?php
 session_start();
+
+// 1. Proteksi Admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-    header('Location: login_admin.php'); exit();
+    header('Location: login_admin.php'); 
+    exit();
 }
+
 include '../config/config.php';
 
-// Ambil filter tahun dari URL
+// 2. Ambil filter tahun dari URL
 $tahunLulus = isset($_GET['tahun_lulus']) ? intval($_GET['tahun_lulus']) : '';
 $where = $tahunLulus ? "WHERE a.tahun_lulus = '$tahunLulus'" : '';
 
-// Query data alumni
+/**
+ * 3. Query Data Alumni
+ * Menggunakan GROUP BY agar satu alumni tetap satu baris di Excel 
+ * dan mengambil data pekerjaan TERBARU saja.
+ */
 $query = "
     SELECT 
-        a.nim, a.nama_lengkap, a.fakultas, a.program_studi, a.tahun_masuk, a.tahun_lulus, a.email, a.no_hp, a.alamat,
-        p.status_pekerjaan, p.nama_perusahaan, p.jabatan, p.gaji_pertama, p.tahun_mulai_kerja, p.relevansi_pekerjaan,
-        k.kepuasan_kurikulum, k.kepuasan_dosen, k.kepuasan_fasilitas, k.relevansi_ilmu_kerja, k.kompetensi_bidang
+        a.stambuk, a.nama_lengkap, a.marhalah, a.konsulat, a.tahun_lulus, a.email, a.no_hp, a.alamat_sekarang, a.status_verifikasi,
+        p.status_aktivitas, p.nama_instansi, p.jabatan_jurusan,
+        k.id_kuesioner
     FROM tb_alumni a
-    LEFT JOIN tb_pekerjaan p ON p.id_alumni = a.id_alumni
+    LEFT JOIN (
+        SELECT * FROM tb_pekerjaan WHERE id_pekerjaan IN (SELECT MAX(id_pekerjaan) FROM tb_pekerjaan GROUP BY id_alumni)
+    ) p ON p.id_alumni = a.id_alumni
     LEFT JOIN tb_kuesioner k ON k.id_alumni = a.id_alumni
     $where
-    ORDER BY a.nama_lengkap ASC
+    GROUP BY a.id_alumni
+    ORDER BY a.tahun_lulus DESC, a.nama_lengkap ASC
 ";
+
 $result = mysqli_query($conn, $query);
 
 if (!$result) {
     die("Terjadi kesalahan query: " . mysqli_error($conn));
 }
 
-$filename = "data_alumni" . ($tahunLulus ? "_$tahunLulus" : "") . "_" . date('Ymd_His') . ".csv";
+// 4. Pengaturan Header File untuk CSV/Excel
+$filename = "Tracer_IKPM_" . ($tahunLulus ? "Angkatan_$tahunLulus" : "Semua_Angkatan") . "_" . date('Ymd') . ".csv";
+
 header("Content-Type: text/csv; charset=utf-8");
 header("Content-Disposition: attachment; filename=\"$filename\"");
 
+// 5. Proses Output Data
 $output = fopen("php://output", "w");
-// Header kolom
+
+// Tambahkan BOM (Byte Order Mark) agar Excel membaca karakter UTF-8 (seperti simbol atau spasi khusus) dengan benar
+fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+// Header kolom di Excel
 fputcsv($output, [
-    'NIM', 'Nama Lengkap', 'Fakultas', 'Prodi', 'Tahun Masuk', 'Tahun Lulus', 'Email', 'No. HP', 'Alamat',
-    'Status Kerja', 'Perusahaan', 'Jabatan', 'Gaji Pertama', 'Tahun Mulai Kerja', 'Relevansi Kerja',
-    'Kepuasan Kurikulum', 'Kepuasan Dosen', 'Kepuasan Fasilitas', 'Relevansi Ilmu-Kerja', 'Kompetensi Bidang'
+    'STAMBUK', 
+    'NAMA LENGKAP', 
+    'MARHALAH', 
+    'KONSULAT', 
+    'TAHUN LULUS', 
+    'EMAIL', 
+    'NO. HP / WA', 
+    'ALAMAT SEKARANG', 
+    'STATUS VERIFIKASI',
+    'STATUS AKTIVITAS', 
+    'NAMA INSTANSI/KAMPUS', 
+    'JABATAN/JURUSAN',
+    'STATUS KUESIONER'
 ]);
 
+// Isi Data
 while ($row = mysqli_fetch_assoc($result)) {
     fputcsv($output, [
-        $row['nim'],
+        $row['stambuk'],
         $row['nama_lengkap'],
-        $row['fakultas'],
-        $row['program_studi'],
-        $row['tahun_masuk'],
+        $row['marhalah'],
+        $row['konsulat'],
         $row['tahun_lulus'],
         $row['email'],
         $row['no_hp'],
-        $row['alamat'],
-        $row['status_pekerjaan'],
-        $row['nama_perusahaan'],
-        $row['jabatan'],
-        $row['gaji_pertama'],
-        $row['tahun_mulai_kerja'],
-        $row['relevansi_pekerjaan'],
-        $row['kepuasan_kurikulum'],
-        $row['kepuasan_dosen'],
-        $row['kepuasan_fasilitas'],
-        $row['relevansi_ilmu_kerja'],
-        $row['kompetensi_bidang']
+        $row['alamat_sekarang'],
+        $row['status_verifikasi'],
+        $row['status_aktivitas'] ?? '-',
+        $row['nama_instansi'] ?? '-',
+        $row['jabatan_jurusan'] ?? '-',
+        ($row['id_kuesioner'] ? 'Sudah Isi' : 'Belum Isi')
     ]);
 }
+
 fclose($output);
 exit();
 ?>

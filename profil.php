@@ -2,11 +2,10 @@
 session_start();
 include 'config/config.php';
 
-// Force set PHP upload limits (di awal sekali)
+// Force set PHP upload limits
 @ini_set('upload_max_filesize', '10M');
 @ini_set('post_max_size', '12M');
 @ini_set('max_execution_time', '300');
-@ini_set('memory_limit', '256M');
 
 // Cek login
 if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
@@ -16,122 +15,69 @@ if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
 
 $id_alumni = $_SESSION['id_alumni'];
 
-// Ambil data alumni dari database
+// Ambil data alumni (tb_alumni)
 $query = "SELECT * FROM tb_alumni WHERE id_alumni = '$id_alumni'";
 $result = mysqli_query($conn, $query);
+
+if (!$result || mysqli_num_rows($result) == 0) {
+    die("Data alumni tidak ditemukan: " . mysqli_error($conn));
+}
 $data = mysqli_fetch_assoc($result);
 
-// Proses update data jika form disubmit
+// Proses update data
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nama_lengkap = mysqli_real_escape_string($conn, $_POST['nama_lengkap']);
-    $fakultas = mysqli_real_escape_string($conn, $_POST['fakultas']);
-    $program_studi = mysqli_real_escape_string($conn, $_POST['program_studi']);
-    $tahun_masuk = mysqli_real_escape_string($conn, $_POST['tahun_masuk']);
-    $tahun_lulus = mysqli_real_escape_string($conn, $_POST['tahun_lulus']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $no_hp = mysqli_real_escape_string($conn, $_POST['no_hp']);
-    $alamat = mysqli_real_escape_string($conn, $_POST['alamat']);
+    $nama_lengkap    = mysqli_real_escape_string($conn, $_POST['nama_lengkap']);
+    $stambuk         = mysqli_real_escape_string($conn, $_POST['stambuk']);
+    $marhalah        = mysqli_real_escape_string($conn, $_POST['marhalah']);
+    $konsulat        = mysqli_real_escape_string($conn, $_POST['konsulat']);
+    $tahun_lulus     = mysqli_real_escape_string($conn, $_POST['tahun_lulus']);
+    $email           = mysqli_real_escape_string($conn, $_POST['email']);
+    $no_hp           = mysqli_real_escape_string($conn, $_POST['no_hp']);
+    $alamat_sekarang = mysqli_real_escape_string($conn, $_POST['alamat_sekarang']);
     
-    $foto_path = $data['foto']; // Default ke foto lama
+    $foto_path = $data['foto']; 
     
-    // Proses upload foto jika ada
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE) {
-        
-        // Debug: Cek error upload
-        if ($_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
-            switch ($_FILES['foto']['error']) {
-                case UPLOAD_ERR_INI_SIZE:
-                case UPLOAD_ERR_FORM_SIZE:
-                    $file_size_mb = round($_FILES['foto']['size'] / 1024 / 1024, 2);
-                    $error_msg = "Ukuran file terlalu besar ($file_size_mb MB). Server limit: " . ini_get('upload_max_filesize') . ". Silakan hubungi administrator.";
-                    break;
-                case UPLOAD_ERR_PARTIAL:
-                    $error_msg = "Upload file tidak lengkap. Silakan coba lagi.";
-                    break;
-                case UPLOAD_ERR_NO_TMP_DIR:
-                    $error_msg = "Folder temporary tidak ditemukan di server.";
-                    break;
-                case UPLOAD_ERR_CANT_WRITE:
-                    $error_msg = "Gagal menulis file ke disk.";
-                    break;
-                default:
-                    $error_msg = "Terjadi error saat upload. Error code: " . $_FILES['foto']['error'];
-            }
-        } else {
-            // Validasi tipe file
+        if ($_FILES['foto']['error'] === UPLOAD_ERR_OK) {
             $allowed_types = ['image/jpeg', 'image/jpg', 'image/png'];
-            $file_type = $_FILES['foto']['type'];
-            $file_size = $_FILES['foto']['size'];
-            $max_size = 10 * 1024 * 1024; // 10MB
-            
-            // Tambahan: Check MIME type dari content (lebih akurat)
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $detected_type = finfo_file($finfo, $_FILES['foto']['tmp_name']);
-            finfo_close($finfo);
-            
-            if (!in_array($file_type, $allowed_types) && !in_array($detected_type, ['image/jpeg', 'image/png'])) {
-                $error_msg = "Format file tidak valid. Hanya JPG, JPEG, dan PNG yang diperbolehkan.";
-            }
-            elseif ($file_size > $max_size) {
-                $size_mb = round($file_size / 1024 / 1024, 2);
-                $error_msg = "Ukuran file terlalu besar ($size_mb MB). Maksimal 10MB.";
-            }
-            else {
+            if (in_array($_FILES['foto']['type'], $allowed_types)) {
                 $upload_dir = 'uploads/';
-                
-                // Buat folder jika belum ada
-                if (!is_dir($upload_dir)) {
-                    mkdir($upload_dir, 0755, true);
-                }
-                
-                // Set permission folder (untuk memastikan bisa write)
-                @chmod($upload_dir, 0755);
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
                 
                 $file_extension = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
                 $new_filename = 'foto_' . $id_alumni . '_' . time() . '.' . $file_extension;
                 $upload_path = $upload_dir . $new_filename;
                 
-                // Coba upload
                 if (move_uploaded_file($_FILES['foto']['tmp_name'], $upload_path)) {
-                    // Set permission file yang diupload
-                    @chmod($upload_path, 0644);
-                    
-                    // Hapus foto lama jika ada dan bukan placeholder
-                    if (!empty($data['foto']) 
-                        && file_exists($data['foto']) 
-                        && $data['foto'] !== 'assets/profile_placeholder.png'
-                        && strpos($data['foto'], 'uploads/') !== false) {
+                    if (!empty($data['foto']) && file_exists($data['foto']) && strpos($data['foto'], 'placeholder') === false) {
                         @unlink($data['foto']);
                     }
-                    
                     $foto_path = $upload_path;
-                } else {
-                    $error_msg = "Gagal mengupload foto. Pastikan folder 'uploads/' memiliki permission 755.";
                 }
+            } else {
+                $error_msg = "Format file tidak valid (Hanya JPG/PNG).";
             }
         }
     }
 
     if (!isset($error_msg)) {
-        // Update data ke database
         $update = "UPDATE tb_alumni SET 
+            stambuk='$stambuk',
             nama_lengkap='$nama_lengkap',
-            fakultas='$fakultas',
-            program_studi='$program_studi',
-            tahun_masuk='$tahun_masuk',
+            marhalah='$marhalah',
+            konsulat='$konsulat',
             tahun_lulus='$tahun_lulus',
             email='$email',
             no_hp='$no_hp',
-            alamat='$alamat',
+            alamat_sekarang='$alamat_sekarang',
             foto='$foto_path'
             WHERE id_alumni='$id_alumni'";
 
         if (mysqli_query($conn, $update)) {
-            $_SESSION['nama_lengkap'] = $nama_lengkap;
             header("Location: profil.php?success=update");
             exit();
         } else {
-            $error_msg = "Gagal mengupdate profil. Silakan coba lagi.";
+            $error_msg = "Gagal update: " . mysqli_error($conn);
         }
     }
 }
@@ -139,389 +85,162 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <link rel="icon" type="image/png" href="assets/logo-ikpm2.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Profil Alumni - Tracer Alumni</title>
+    <title>Profil Pribadi - Tracer Study IKPM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
     <style>
-        html, body { height: 100%; }
-        body {
-            background: #f6fafd;
-            min-height: 100vh;
-            margin: 0;
-            font-family: 'Montserrat', Arial, sans-serif;
-        }
-        .navbar {
-            background: #e8f5e9 !important;
-            box-shadow: 0 2px 8px rgba(120,180,120,0.10) !important;
-            z-index: 1051;
-            min-height: 64px;
-            padding: 8px 0;
-        }
-        .navbar-brand {
-            display: flex; 
-            align-items: center; 
-            gap: 14px;
-            color: #197948 !important;
-            font-weight: 700;
-            font-size: 1.25rem;
-            letter-spacing: .01em;
-        }
-        .navbar-brand img {
-            height: 40px; 
-            width: 40px; 
-            object-fit: contain; 
-            border-radius: 6px;
-            border: none; 
-            box-shadow: none; 
-            background: transparent;
-        }
-        .navbar .nav-link {
-            color: #197948 !important;
-            font-weight: 600;
-            padding: 6px 12px;
-            border-radius: 6px;
-            transition: all .15s ease;
-        }
-        .navbar .nav-link:hover {
-            background: rgba(25,121,72,0.08);
-            color: #145a35 !important;
-        }
-        .navbar .nav-link.active {
-            background: #dcf8e5;
-            color: #145a35 !important;
-        }
-        .sidebar {
-            min-height: 100vh;
-            background: #fff;
-            border-right: 1.6px solid #e4efea;
-            padding: 0;
-            box-shadow: 0 1px 10px #3ead6130;
-            position: fixed;
-            left: 0; 
-            top: 64px;
-            bottom: 0; 
-            z-index: 1040;
-            width: 230px;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between;
-        }
-        .main-content {
-            margin-left: 230px;
-            padding: 88px 38px 30px 38px;
-        }
-        .profile-box {
-            text-align: center;
-            padding: 32px 0 14px 0;
-        }
-        .profile-img {
-            width: 92px; 
-            height: 92px; 
-            object-fit: cover;
-            border-radius: 50%; 
-            border: 4px solid #e9f7ef;
-        }
-        .profile-name {
-            font-size: 1.14rem; 
-            font-weight: 700; 
-            margin-top: 8px; 
-            color: #197948;
-        }
-        .profile-desc {
-            font-size: 1.01rem; 
-            color: #7fa882;
-        }
-        .sidebar-link {
-            display: flex; 
-            align-items: center;
-            color: #222; 
-            background: #f7fcfa;
-            border: none; 
-            padding: 14px 28px; 
-            margin-bottom: 4px;
-            border-radius: 8px 0 0 8px;
-            text-decoration: none; 
-            font-weight: 500;
-            transition: .18s;
-        }
-        .sidebar-link.active, .sidebar-link:hover {
-            background: #dcf8e5;
-            color: #258B42;
-        }
-        .sidebar-link i {
-            font-size: 1.15rem; 
-            margin-right: 11px;
-        }
-        .card {
-            border-radius: 16px;
-            box-shadow: 0 4px 14px rgba(34,139,34,0.07);
-            border: none;
-        }
-        .foto-preview {
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 3px solid #e9f7ef;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .btn-upload {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            color: #6c757d;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-upload:hover {
-            border-color: #198754;
-            background: #d1e7dd;
-            color: #198754;
-        }
-        @media (max-width: 900px) {
-            .sidebar {
-                width: 100vw;
-                position: relative;
-                top: 0;
-                border-radius: 0;
-                min-height: auto;
-                box-shadow: none;
-            }
-            .main-content {
-                margin-left: 0;
-                padding: 20px 6px 18px 6px;
-            }
-            .navbar-brand {
-                font-size: 1.1rem;
-            }
-            .navbar-brand img {
-                height: 32px;
-                width: 32px;
-            }
-            .foto-preview {
-                width: 150px;
-                height: 150px;
-            }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f6fafd; min-height: 100vh; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        /* Layout CSS (Identik dengan Dashboard) */
+        .navbar { background: #e8f5e9 !important; border-bottom: 2px solid #197948; z-index: 1051; position: fixed; top: 0; width: 100%; }
+        .navbar-brand { color: #197948 !important; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .navbar-brand img { height: 35px; }
+
+        .sidebar { width: 265px; background: #fff; border-right: 1px solid #e4efea; position: fixed; top: 0; bottom: 0; padding-top: 80px; z-index: 1040; transition: 0.3s; }
+        .profile-box { text-align: center; padding: 20px; border-bottom: 1px solid #eee; margin-bottom: 15px; }
+        .profile-img-sidebar { width: 85px; height: 85px; object-fit: cover; border-radius: 50%; border: 3px solid #197948; }
+        .profile-name { font-size: 1.1rem; font-weight: 700; color: #197948; margin-top: 10px; }
+        .profile-desc { font-size: 0.85rem; color: #666; }
+
+        .sidebar-link { display: flex; align-items: center; padding: 12px 25px; color: #444; text-decoration: none; transition: 0.2s; font-weight: 500; }
+        .sidebar-link:hover, .sidebar-link.active { background: #dcf8e5; color: #197948; }
+        .sidebar-link i { margin-right: 12px; font-size: 1.2rem; }
+
+        .main-content { margin-left: 265px; margin-top: 64px; padding: 40px; transition: 0.3s; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        .foto-preview-container { text-align: center; margin-bottom: 20px; }
+        .foto-preview { width: 150px; height: 150px; object-fit: cover; border-radius: 15px; border: 3px solid #e8f5e9; margin-bottom: 15px; }
+
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 20px; }
         }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg fixed-top">
+
+<nav class="navbar navbar-expand-lg">
     <div class="container-fluid px-3">
-        <a class="navbar-brand fw-bold" href="dashboard_alumni.php">
-            <img src="assets/logo-uin.png" alt="Logo"/>
-            Tracer Alumni
+        <button class="btn d-lg-none text-success" id="hamburgerBtn"><i class="bi bi-list fs-3"></i></button>
+        <a class="navbar-brand" href="#">
+            <img src="assets/logo-ikpm2.png" alt="Logo">
+            <span>Tracer Alumni IKPM</span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDashboard" aria-controls="navbarNavDashboard" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div id="navbarNavDashboard" class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="dashboard_alumni.php">
-                        <i class="bi bi-house-door-fill"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="logout.php">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </a>
-                </li>
-            </ul>
-        </div>
     </div>
 </nav>
 
-<div class="sidebar">
-    <div>
-        <div class="profile-box">
-            <img src="<?= htmlspecialchars($data['foto'] ?? 'assets/profile_placeholder.png') ?>" class="profile-img" alt="Foto Alumni">
-            <div class="profile-name"><?= htmlspecialchars($data['nama_lengkap']) ?></div>
-            <div class="profile-desc">Alumni<br><?= htmlspecialchars($data['program_studi']) ?></div>
-        </div>
-        <a href="dashboard_alumni.php" class="sidebar-link">
-            <i class="bi bi-house-door-fill"></i> Dashboard
-        </a>
-        <a href="profil.php" class="sidebar-link active">
-            <i class="bi bi-person-badge-fill"></i> Informasi Pribadi
-        </a>
-        <a href="pekerjaan.php" class="sidebar-link">
-            <i class="bi bi-briefcase-fill"></i> Data Pekerjaan
-        </a>
-        <a href="kuesioner.php" class="sidebar-link">
-            <i class="bi bi-list-task"></i> Isi Kuesioner
-        </a>
+<div class="sidebar" id="sidebar">
+    <div class="profile-box">
+        <?php $foto = (!empty($data['foto']) && file_exists($data['foto'])) ? $data['foto'] : 'assets/profile_placeholder.jpg'; ?>
+        <img src="<?= $foto ?>" class="profile-img-sidebar">
+        <div class="profile-name"><?= htmlspecialchars(explode(' ', $data['nama_lengkap'])[0]) ?></div>
+        <div class="profile-desc">Marhalah <?= htmlspecialchars($data['marhalah']) ?></div>
+        <div class="profile-desc text-muted small">Stambuk: <?= htmlspecialchars($data['stambuk']) ?></div>
     </div>
-    <div class="mb-3">
-        <a href="logout.php" class="sidebar-link text-danger">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
+    
+    <div class="nav-links">
+        <a href="dashboard_alumni.php" class="sidebar-link"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a href="profil.php" class="sidebar-link active"><i class="bi bi-person-circle"></i> Profil Pribadi</a>
+        <a href="pekerjaan.php" class="sidebar-link"><i class="bi bi-briefcase-fill"></i> Aktivitas/Khidmah</a>
+        <a href="kuesioner.php" class="sidebar-link"><i class="bi bi-file-earmark-text-fill"></i> Kuesioner</a>
+        <hr class="mx-3">
+        <a href="logout.php" class="sidebar-link text-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
     </div>
 </div>
 
 <div class="main-content">
+    <div class="mb-4">
+        <h3 class="fw-bold">Identitas Diri</h3>
+        <p class="text-muted">Pastikan data profil Anda selalu akurat dan terbaru.</p>
+    </div>
+
+    <?php if (isset($_GET['success'])): ?>
+        <div class="alert alert-success border-0 shadow-sm mb-4"><i class="bi bi-check-circle-fill me-2"></i>Data profil berhasil diperbarui!</div>
+    <?php endif; ?>
+
     <div class="row">
-        <div class="col-12">
-            <h4 class="fw-bold text-success mb-4">
-                <i class="bi bi-person-badge-fill me-2"></i>Profil Alumni
-            </h4>
-            
-            <?php
-            if (isset($_GET['success']) && $_GET['success'] == 'update') {
-                echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i>Profil berhasil diperbarui.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                      </div>';
-            }
-            if (isset($error_msg)) {
-                echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>'.$error_msg.'
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                      </div>';
-            }
-            ?>
+        <div class="col-lg-4 mb-4">
+            <div class="card p-4 h-100">
+                <h6 class="fw-bold text-success mb-4">FOTO PROFIL</h6>
+                <div class="foto-preview-container">
+                    <img src="<?= $foto ?>" class="foto-preview">
+                    <form method="POST" enctype="multipart/form-data" id="form-foto">
+                        <input type="hidden" name="nama_lengkap" value="<?= $data['nama_lengkap'] ?>">
+                        <input type="hidden" name="stambuk" value="<?= $data['stambuk'] ?>">
+                        <input type="hidden" name="marhalah" value="<?= $data['marhalah'] ?>">
+                        <input type="hidden" name="konsulat" value="<?= $data['konsulat'] ?>">
+                        <input type="hidden" name="tahun_lulus" value="<?= $data['tahun_lulus'] ?>">
+                        <input type="hidden" name="email" value="<?= $data['email'] ?>">
+                        <input type="hidden" name="no_hp" value="<?= $data['no_hp'] ?>">
+                        <input type="hidden" name="alamat_sekarang" value="<?= $data['alamat_sekarang'] ?>">
 
-            <div class="row">
-                <!-- Foto Profil -->
-                <div class="col-lg-4 mb-4">
-                    <div class="card p-4 text-center">
-                        <h6 class="card-title mb-3">Foto Profil</h6>
-                        <div class="mb-3">
-                            <img src="<?= htmlspecialchars($data['foto'] ?? 'assets/profile_placeholder.png') ?>" 
-                                 class="foto-preview" alt="Foto Profil" id="preview-foto">
+                        <label for="foto" class="btn btn-outline-success btn-sm w-100">Ganti Foto Identitas</label>
+                        <input type="file" id="foto" name="foto" hidden onchange="document.getElementById('form-foto').submit()">
+                        <small class="text-muted d-block mt-2">Format: JPG/PNG, Maks. 2MB</small>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 mb-4">
+            <div class="card p-4">
+                <h6 class="fw-bold text-success mb-4">DATA LENGKAP</h6>
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Nomor Stambuk / NIW</label>
+                            <input type="text" class="form-control bg-light" name="stambuk" value="<?= htmlspecialchars($data['stambuk']) ?>" required>
                         </div>
-                        <form method="POST" enctype="multipart/form-data" id="form-foto">
-                            <input type="hidden" name="MAX_FILE_SIZE" value="10485760">
-                            <input type="hidden" name="nama_lengkap" value="<?= htmlspecialchars($data['nama_lengkap']) ?>">
-                            <input type="hidden" name="fakultas" value="<?= htmlspecialchars($data['fakultas']) ?>">
-                            <input type="hidden" name="program_studi" value="<?= htmlspecialchars($data['program_studi']) ?>">
-                            <input type="hidden" name="tahun_masuk" value="<?= htmlspecialchars($data['tahun_masuk']) ?>">
-                            <input type="hidden" name="tahun_lulus" value="<?= htmlspecialchars($data['tahun_lulus']) ?>">
-                            <input type="hidden" name="email" value="<?= htmlspecialchars($data['email']) ?>">
-                            <input type="hidden" name="no_hp" value="<?= htmlspecialchars($data['no_hp']) ?>">
-                            <input type="hidden" name="alamat" value="<?= htmlspecialchars($data['alamat']) ?>">
-                            
-                            <label for="foto" class="btn-upload d-block">
-                                <i class="bi bi-camera-fill me-2"></i>Pilih Foto
-                            </label>
-                            <input type="file" id="foto" name="foto" accept="image/jpeg,image/jpg,image/png" style="display: none;">
-                            <small class="text-muted mt-2 d-block">Format: JPG, PNG. Max: 10MB</small>
-                            <small class="text-muted d-block">Server limit: <?= ini_get('upload_max_filesize') ?></small>
-                        </form>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Marhalah (Angkatan)</label>
+                            <input type="text" class="form-control" name="marhalah" value="<?= htmlspecialchars($data['marhalah']) ?>" required>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label small fw-bold">Nama Lengkap</label>
+                            <input type="text" class="form-control" name="nama_lengkap" value="<?= htmlspecialchars($data['nama_lengkap']) ?>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Konsulat Asal</label>
+                            <input type="text" class="form-control" name="konsulat" value="<?= htmlspecialchars($data['konsulat']) ?>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Tahun Lulus Gontor</label>
+                            <input type="number" class="form-control" name="tahun_lulus" value="<?= htmlspecialchars($data['tahun_lulus']) ?>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Email Aktif</label>
+                            <input type="email" class="form-control" name="email" value="<?= htmlspecialchars($data['email']) ?>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">No. HP / WhatsApp</label>
+                            <input type="text" class="form-control" name="no_hp" value="<?= htmlspecialchars($data['no_hp']) ?>" required>
+                        </div>
+                        <div class="col-12 mb-4">
+                            <label class="form-label small fw-bold">Alamat Domisili Sekarang</label>
+                            <textarea class="form-control" name="alamat_sekarang" rows="3"><?= htmlspecialchars($data['alamat_sekarang']) ?></textarea>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Form Data -->
-                <div class="col-lg-8">
-                    <div class="card p-4">
-                        <h6 class="card-title mb-3">Informasi Pribadi</h6>
-                        <form method="POST" action="profil.php">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">NIM</label>
-                                <input type="text" class="form-control" name="nim" value="<?=htmlspecialchars($data['nim'])?>" disabled />
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Nama Lengkap</label>
-                                <input type="text" class="form-control" name="nama_lengkap" value="<?=htmlspecialchars($data['nama_lengkap'])?>" required />
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Fakultas</label>
-                                <select class="form-select" name="fakultas" required>
-                                    <option value="">-- Pilih Fakultas --</option>
-                                    <?php
-                                    $fakultas_arr = [
-                                        'Sains dan Teknologi',
-                                        'Ekonomi dan Bisnis Islam',
-                                        'Ushuluddin, Filsafat dan Politik',
-                                        'Fakultas Kedokteran dan Ilmu Kesehatan',
-                                        'Syariah dan Hukum',
-                                        'Tarbiyah dan Keguruan',
-                                        'Dakwah dan Komunikasi',
-                                        'Adab dan Humaniora'
-                                    ];
-                                    foreach ($fakultas_arr as $fak) {
-                                        $selected = ($data['fakultas'] == $fak) ? 'selected' : '';
-                                        echo "<option value=\"$fak\" $selected>$fak</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Program Studi</label>
-                                    <input type="text" class="form-control" name="program_studi" value="<?=htmlspecialchars($data['program_studi'])?>" required />
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label fw-semibold">Tahun Masuk</label>
-                                    <input type="number" class="form-control" name="tahun_masuk" value="<?=htmlspecialchars($data['tahun_masuk'])?>" min="2000" max="2099" />
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label fw-semibold">Tahun Lulus</label>
-                                    <input type="number" class="form-control" name="tahun_lulus" value="<?=htmlspecialchars($data['tahun_lulus'])?>" min="2000" max="2099" required />
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Email</label>
-                                <input type="email" class="form-control" name="email" value="<?=htmlspecialchars($data['email'])?>" required />
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">No. HP/WhatsApp</label>
-                                <input type="text" class="form-control" name="no_hp" value="<?=htmlspecialchars($data['no_hp'])?>" />
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold">Alamat Domisili</label>
-                                <textarea class="form-control" name="alamat" rows="3"><?=htmlspecialchars($data['alamat'])?></textarea>
-                            </div>
-                            
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-check-lg me-2"></i>Update Profil
-                                </button>
-                                <a href="dashboard_alumni.php" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left me-2"></i>Kembali
-                                </a>
-                            </div>
-                        </form>
+                    <div class="d-flex gap-2 border-top pt-4">
+                        <button type="submit" class="btn btn-success px-4"><i class="bi bi-save me-2"></i>Simpan Perubahan</button>
+                        <a href="dashboard_alumni.php" class="btn btn-light px-4">Batal</a>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.getElementById('foto').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        // Cek ukuran file di JavaScript
-        const maxSize = 10 * 1024 * 1024; // 10MB
-        if (file.size > maxSize) {
-            const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-            alert(`Ukuran file terlalu besar (${sizeMB} MB)! Maksimal 10MB.`);
-            e.target.value = ''; // Reset input
-            return;
-        }
-        
-        // Preview foto
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('preview-foto').src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-        // Auto submit form foto
-        document.getElementById('form-foto').submit();
-    }
-});
+    const btn = document.getElementById('hamburgerBtn');
+    const sidebar = document.getElementById('sidebar');
+    btn.onclick = () => sidebar.classList.toggle('active');
 </script>
 </body>
 </html>

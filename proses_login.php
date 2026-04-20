@@ -12,8 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
 
-    // Ambil data user berdasar NIM atau email
-    $query = "SELECT * FROM tb_alumni WHERE nim=? OR email=?";
+    // Ambil data user berdasar Stambuk (sebelumnya nim) atau email
+    // Sesuaikan nama kolom dengan database db_tracer_ikpm: stambuk
+    $query = "SELECT * FROM tb_alumni WHERE stambuk=? OR email=?";
     $stmt = mysqli_prepare($conn, $query);
     mysqli_stmt_bind_param($stmt, "ss", $nim_email, $nim_email);
     mysqli_stmt_execute($stmt);
@@ -22,16 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($result && mysqli_num_rows($result) == 1) {
         $data = mysqli_fetch_assoc($result);
 
-        // Verifikasi password (gunakan password_verify jika bcrypt)
-        // Karena data lama pakai MD5, check MD5 dulu, tapi disarankan upgrade ke password_hash
+        // Verifikasi password MD5
         if (md5($password) === $data['password']) {
             // Login berhasil, set session
             $_SESSION['id_alumni'] = $data['id_alumni'];
-            $_SESSION['nim'] = $data['nim'];
+            $_SESSION['stambuk']   = $data['stambuk']; // Diubah dari nim ke stambuk
             $_SESSION['nama_lengkap'] = $data['nama_lengkap'];
-            $_SESSION['email'] = $data['email'];
-            $_SESSION['program_studi'] = $data['program_studi'];
-            $_SESSION['is_login'] = true;
+            $_SESSION['email']     = $data['email'];
+            $_SESSION['marhalah']  = $data['marhalah']; // Menggantikan program_studi
+            $_SESSION['konsulat']  = $data['konsulat']; // Menambahkan info konsulat ke session
+            $_SESSION['is_login']  = true;
 
             header("Location: dashboard_alumni.php");
             exit();

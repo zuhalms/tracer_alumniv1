@@ -1,415 +1,404 @@
 <?php
 session_start();
+include '../config/config.php'; 
+
+/** * PROTEKSI ADMIN 
+ * Memastikan hanya admin yang sudah login bisa mengakses
+ */
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    header("Location: login_admin.php?error=not_logged_in");
+    exit();
+}
+
+// Ambil data session untuk tampilan profile
+$admin_nama = $_SESSION['admin_nama'] ?? 'Administrator';
+$admin_level = $_SESSION['admin_level'] ?? 'IKPM Sulselbar';
+
+// 1. Hitung Total Alumni
+$sql_total = mysqli_query($conn, "SELECT COUNT(*) as total FROM tb_alumni");
+$total_alumni = mysqli_fetch_assoc($sql_total)['total'] ?? 0;
+
+// 2. Hitung Sudah Kuesioner
+$sql_kuesioner = mysqli_query($conn, "SELECT COUNT(DISTINCT id_alumni) as total FROM tb_kuesioner");
+$total_sudah_kuesioner = mysqli_fetch_assoc($sql_kuesioner)['total'] ?? 0;
+
+// 3. Menunggu Verifikasi
+$sql_pending = mysqli_query($conn, "SELECT COUNT(*) as total FROM tb_alumni WHERE status_verifikasi = 'Pending'");
+$total_pending = mysqli_fetch_assoc($sql_pending)['total'] ?? 0;
+
+// 4. Hitung Yang Sudah Update Pekerjaan
+$sql_kerja = mysqli_query($conn, "SELECT COUNT(DISTINCT id_alumni) as total FROM tb_pekerjaan");
+$total_kerja = mysqli_fetch_assoc($sql_kerja)['total'] ?? 0;
+
+// 5. Tambahan: Hitung Jumlah Berita (Opsional untuk statistik)
+$sql_berita = mysqli_query($conn, "SELECT COUNT(*) as total FROM tb_berita");
+$total_berita = mysqli_fetch_assoc($sql_berita)['total'] ?? 0;
+
+// Deteksi halaman aktif untuk class CSS
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <link rel="icon" type="image/png" href="../assets/logo-uin.png">
+    <link rel="icon" type="image/png" href="../assets/logo-ikpm2.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard Admin - Tracer Alumni</title>
+    <title>Admin Dashboard - Tracer IKPM</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        html, body {
-            height: 100%;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #f6fafd;
-            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(135deg, #f6fafd 0%, #eefaf2 100%);
+            font-family: 'Inter', sans-serif;
+            color: #334155;
             overflow-x: hidden;
-            min-height: 100vh;
+            position: relative;
         }
-        
-        /* Navbar Styles */
-        .navbar {
-            background: #e8f5e9 !important;
-            box-shadow: 0 2px 8px rgba(120,180,120,0.10) !important;
-            min-height: 64px;
-            padding: 8px 0;
-            z-index: 1051;
+        body::before,
+        body::after {
+            content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-        }
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            color: #197948 !important;
-            font-weight: 700;
-            font-size: 1.25rem;
-        }
-        .navbar-brand img {
-            height: 40px;
-            width: 40px;
-            object-fit: contain;
-            border-radius: 6px;
-            border: none;
-            background: transparent;
-        }
-        
-        /* Hamburger Menu Button (Mobile Only) */
-        .hamburger-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: #197948;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px 10px;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar-admin {
-            min-height: 100vh;
-            background: #fff;
-            width: 265px;
-            border-right: 1.6px solid #e4efea;
-            box-shadow: 0 1px 10px #3ead6130;
-            padding-top: 64px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            z-index: 1040;
-            transition: transform 0.3s ease-in-out;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding-bottom: 100px;
-        }
-        
-        .sidebar-content {
-            flex: 1;
-        }
-        
-        .sidebar-profile {
-            text-align: center;
-            padding: 32px 20px 14px 20px;
-        }
-        .sidebar-profile img {
-            width: 92px;
-            height: 92px;
             border-radius: 50%;
-            object-fit: cover;
-            background: #e4faf0;
-            border: 4px solid #e9f7ef;
-            margin-bottom: 8px;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(8px);
+            opacity: 0.18;
         }
-        .sidebar-profile .admin-name {
-            color: #197948;
-            font-size: 1.14rem;
-            font-weight: 700;
-            margin-bottom: 2px;
+        body::before {
+            width: 340px;
+            height: 340px;
+            top: -100px;
+            right: -120px;
+            background: radial-gradient(circle, rgba(25,121,72,0.22) 0%, rgba(25,121,72,0) 72%);
         }
-        .sidebar-profile .admin-role {
-            font-size: 1rem;
-            color: #7fa882;
+        body::after {
+            width: 260px;
+            height: 260px;
+            left: -90px;
+            bottom: -120px;
+            background: radial-gradient(circle, rgba(46,172,104,0.18) 0%, rgba(46,172,104,0) 74%);
         }
         
-        .sidebar-menu {
-            padding-top: 10px;
+        .navbar { 
+            background: rgba(232, 245, 233, 0.9) !important; 
+            border-bottom: 1px solid rgba(25, 121, 72, 0.18); 
+            height: 64px; 
+            z-index: 1100;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 30px rgba(25, 121, 72, 0.06);
         }
-        .sidebar-menu .menu-item {
+        .navbar-brand { color: #197948 !important; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .navbar-brand img { height: 35px; }
+
+        .sidebar { 
+            width: 265px; 
+            background: #fff; 
+            border-right: 1px solid #e4efea; 
+            position: fixed; 
+            top: 0; 
+            bottom: 0; 
+            padding-top: 80px; 
+            z-index: 1050; 
+            transition: 0.3s;
+            box-shadow: 12px 0 28px rgba(15, 23, 42, 0.04);
+        }
+        .sidebar-profile { text-align: center; padding: 22px 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 15px; }
+        .admin-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #197948; padding: 3px; object-fit: cover; box-shadow: 0 8px 24px rgba(25, 121, 72, 0.12); }
+        
+        .sidebar-link { 
+            display: flex; 
+            align-items: center; 
+            padding: 13px 25px; 
+            color: #475569; 
+            text-decoration: none; 
+            font-weight: 500; 
+            transition: 0.2s ease;
+            position: relative;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            background: linear-gradient(90deg, rgba(220, 248, 229, 0.95), rgba(220, 248, 229, 0.55));
+            color: #197948;
+            transform: translateX(4px);
+        }
+        .sidebar-link i { margin-right: 12px; font-size: 1.2rem; }
+
+        .main-content { 
+            margin-left: 265px; 
+            margin-top: 64px; 
+            padding: 40px; 
+            transition: 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .welcome-card { 
+            background: linear-gradient(135deg, #197948 0%, #2eac68 100%); 
+            color: white; 
+            border-radius: 20px; 
+            border: none;
+            overflow: hidden;
+            box-shadow: 0 16px 38px rgba(25, 121, 72, 0.18);
+            position: relative;
+        }
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            inset: 18px auto auto auto;
+            right: 18px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .welcome-card::after {
+            content: '';
+            position: absolute;
+            left: -28px;
+            bottom: -34px;
+            width: 120px;
+            height: 120px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.07);
+            transform: rotate(18deg);
+        }
+
+        .stat-card { 
+            border-radius: 18px; 
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05); 
+            transition: transform 0.22s ease, box-shadow 0.22s ease; 
+            background: rgba(255, 255, 255, 0.96);
+        }
+        .stat-card:hover { 
+            transform: translateY(-6px); 
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08); 
+        }
+        .icon-box { 
+            width: 48px; height: 48px; border-radius: 12px; 
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+        }
+        .section-title {
             display: flex;
             align-items: center;
-            gap: 11px;
-            padding: 14px 28px;
-            font-size: 1.07rem;
-            background: #f7fcfa;
-            color: #222;
-            border: none;
-            border-radius: 8px 0 0 8px;
-            margin-bottom: 4px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: background 0.18s, color 0.18s;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 1rem;
         }
-        .sidebar-menu .menu-item.active,
-        .sidebar-menu .menu-item:hover {
-            background: #dcf8e5;
-            color: #258B42;
+        .section-title h3,
+        .section-title p {
+            margin-bottom: 0;
         }
-        .sidebar-menu .menu-item .bi {
-            font-size: 1.15rem;
-            min-width: 22px;
-        }
-        
-        /* Logout button fixed at bottom of sidebar (Desktop) */
-        .logout-link {
-            position: fixed;
-            bottom: 28px;
-            left: 0;
-            width: 265px;
-            text-align: center;
-            z-index: 1041;
-            background: #fff;
-            padding: 10px 0;
-        }
-        
-        /* Logout button after profile (Mobile) - Hidden by default */
-        .logout-mobile {
-            display: none;
-            padding: 15px 20px;
-            margin-top: 10px;
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: 265px;
-            margin-top: 64px;
-            padding: 30px 38px;
-            min-height: calc(100vh - 64px);
-            background: #f6fafd;
-            transition: margin-left 0.3s ease-in-out;
-        }
-        
-        .header-admin {
-            font-weight: 700;
-            color: #219150;
-            margin-bottom: 24px;
-            font-size: 1.44rem;
-            text-align: left;
-        }
-        
-        .welcome-box {
-            background: #fff;
+        .quick-actions-card {
             border-radius: 18px;
-            box-shadow: 0 2px 14px rgba(50, 108, 75, .07);
-            padding: 28px 38px 30px 38px;
-            max-width: 1200px;
-            margin: 0;
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            background: rgba(255, 255, 255, 0.96);
         }
-        .welcome-head {
-            font-weight: 800;
-            font-size: 2.1rem;
-            color: #212a2e;
-            margin-bottom: 12px;
-            text-align: left;
+        .quick-actions-card .btn {
+            border-radius: 999px;
         }
-        .welcome-desc {
-            font-size: 1.09rem;
-            color: #354b3b;
-            text-align: left;
-            line-height: 1.7;
+        .btn-success {
+            background: linear-gradient(135deg, #197948, #2eac68);
+            border-color: #197948;
+            box-shadow: 0 8px 20px rgba(25, 121, 72, 0.16);
         }
-        
-        /* Overlay for mobile sidebar */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1039;
-            transition: opacity 0.3s ease-in-out;
+        .btn-success:hover {
+            background: linear-gradient(135deg, #155c29, #24995a);
+            border-color: #155c29;
+            transform: translateY(-1px);
         }
-        
-        /* Responsive Styles */
+        .btn-outline-primary {
+            border-color: rgba(25, 121, 72, 0.3);
+            color: #197948;
+        }
+        .btn-outline-primary:hover {
+            background: #197948;
+            border-color: #197948;
+            color: #fff;
+        }
+        .content-fade {
+            animation: fadeUp 0.7s ease both;
+        }
+        .content-fade.delay-1 { animation-delay: 0.08s; }
+        .content-fade.delay-2 { animation-delay: 0.16s; }
+        .content-fade.delay-3 { animation-delay: 0.24s; }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media (max-width: 991px) {
-            .hamburger-btn {
-                display: block;
-            }
-            
-            .sidebar-admin {
-                transform: translateX(-100%);
-                width: 100vw;
-                position: fixed;
-                top: 0;
-                border-radius: 0;
-                box-shadow: none;
-                padding-bottom: 20px;
-            }
-            
-            .sidebar-admin.active {
-                transform: translateX(0);
-            }
-            
-            .sidebar-overlay.active {
-                display: block;
-            }
-            
-            /* Hide desktop logout, show mobile logout */
-            .logout-link {
-                display: none;
-            }
-            
-            .logout-mobile {
-                display: block;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 20px 20px;
-            }
-            
-            .welcome-box {
-                padding: 24px 24px;
-            }
-            
-            .welcome-head {
-                font-size: 1.7rem;
-            }
-            
-            .welcome-desc {
-                font-size: 1rem;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
+            .main-content { margin-left: 0; padding: 20px; }
+            .section-title { flex-direction: column; align-items: flex-start; }
+            .welcome-card::before,
+            .welcome-card::after { display: none; }
+            .quick-actions-card .d-flex { flex-direction: column; }
+            .quick-actions-card .btn { width: 100%; }
         }
-        
-        @media (max-width: 600px) {
-            .navbar-brand {
-                font-size: 1rem;
-            }
-            
-            .navbar-brand img {
-                height: 32px;
-                width: 32px;
-            }
-            
-            .main-content {
-                padding: 16px 12px;
-            }
-            
-            .welcome-box {
-                padding: 20px 16px;
-            }
-            
-            .welcome-head {
-                font-size: 1.5rem;
-            }
-            
-            .welcome-desc {
-                font-size: 0.95rem;
-            }
-            
-            .header-admin {
-                font-size: 1.25rem;
-            }
-            
-            .sidebar-profile img {
-                width: 70px;
-                height: 70px;
-            }
-            
-            .sidebar-profile .admin-name {
-                font-size: 1.1rem;
-            }
-            
-            .sidebar-profile .admin-role {
-                font-size: 0.95rem;
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
             }
         }
     </style>
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg fixed-top">
+<nav class="navbar fixed-top">
     <div class="container-fluid px-3">
-        <button class="hamburger-btn" id="hamburgerBtn">
-            <i class="bi bi-list"></i>
+        <button class="btn d-lg-none text-success" id="hamburgerBtn">
+            <i class="bi bi-list fs-3"></i>
         </button>
-        <a class="navbar-brand fw-bold" href="dashboard_admin.php">
-            <img src="../assets/logo-uin.png" alt="Logo Admin"> Tracer Alumni (Admin)
+        <a class="navbar-brand" href="dashboard_admin.php">
+            <img src="../assets/logo-ikpm2.png" alt="Logo">
+            <span>Admin Tracer IKPM</span>
         </a>
     </div>
 </nav>
 
-<!-- Sidebar Overlay (for mobile) -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-<!-- Sidebar -->
-<div class="sidebar-admin" id="sidebar">
-    <div class="sidebar-content">
-        <div class="sidebar-profile">
-            <img src="../assets/admin.png" alt="Foto Admin">
-            <div class="admin-name">Administrator</div>
-            <div class="admin-role">Tracer Alumni</div>
-        </div>
-        
-        <!-- Logout Mobile (After Profile) -->
-        <div class="logout-mobile">
-            <a href="logout_admin.php" class="btn btn-outline-danger btn-sm w-100 px-4">
-                <i class="bi bi-box-arrow-right me-1"></i>Logout
-            </a>
-        </div>
-        
-        <div class="sidebar-menu">
-            <a href="dashboard_admin.php" class="menu-item active">
-                <i class="bi bi-house-door-fill"></i> Dashboard
-            </a>
-            <a href="data_alumni.php" class="menu-item">
-                <i class="bi bi-speedometer2"></i> Data Alumni
-            </a>
-            <a href="admin_export.php" class="menu-item">
-                <i class="bi bi-file-earmark-excel"></i> Export Data
-            </a>
-        </div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-profile">
+        <img src="../assets/admin.png" class="admin-avatar" alt="Admin" onerror="this.src='https://via.placeholder.com/80'">
+        <div class="fw-bold mt-2 text-success"><?= htmlspecialchars($admin_nama) ?></div>
+        <div class="small text-muted"><?= htmlspecialchars($admin_level) ?></div>
     </div>
     
-    <!-- Logout Desktop (Bottom) -->
-    <div class="logout-link">
-        <a href="logout_admin.php" class="btn btn-outline-danger btn-sm my-2 px-4">
-            <i class="bi bi-box-arrow-right me-1"></i>Logout
+    <div class="nav-links">
+        <a href="dashboard_admin.php" class="sidebar-link <?= ($current_page == 'dashboard_admin.php') ? 'active' : '' ?>">
+            <i class="bi bi-grid-1x2-fill"></i> Dashboard
+        </a>
+        <a href="data_alumni.php" class="sidebar-link <?= ($current_page == 'data_alumni.php') ? 'active' : '' ?>">
+            <i class="bi bi-people-fill"></i> Data Alumni
+        </a>
+        
+        <a href="kelola_berita.php" class="sidebar-link <?= ($current_page == 'kelola_berita.php') ? 'active' : '' ?>">
+            <i class="bi bi-newspaper"></i> Kelola Berita
+        </a>
+
+        <a href="admin_export.php" class="sidebar-link <?= ($current_page == 'admin_export.php') ? 'active' : '' ?>">
+            <i class="bi bi-file-earmark-excel-fill"></i> Export Data
+        </a>
+        <hr class="mx-3">
+        <a href="logout_admin.php" class="sidebar-link text-danger" onclick="return confirm('Yakin ingin logout?')">
+            <i class="bi bi-box-arrow-right"></i> Logout
         </a>
     </div>
 </div>
 
-<!-- Main Content -->
 <div class="main-content">
-    <div class="header-admin">
-        <i class="bi bi-house-door-fill me-2"></i> Dashboard
+    <div class="section-title content-fade">
+        <h3 class="fw-bold">Ringkasan Statistik</h3>
+        <p class="text-muted">Pantau perkembangan data tracer alumni secara real-time.</p>
     </div>
-    <div class="welcome-box">
-        <div class="welcome-head">Selamat Datang, Admin!</div>
-        <div class="welcome-desc">
-            Selamat datang di sistem tracer alumni.<br>
-            Anda dapat mengelola data alumni, memantau progres kuesioner, serta mengekspor data untuk kepentingan evaluasi dan pelaporan kampus di UIN Alauddin Makassar.<br>
-            Silakan gunakan menu di sidebar untuk navigasi fitur sistem ini.
+
+    <div class="card welcome-card p-4 mb-4 shadow-sm content-fade delay-1">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="fw-bold">Selamat Datang, <?= explode(' ', $admin_nama)[0] ?>!</h4>
+                <p class="mb-0 opacity-75">Anda login sebagai <strong><?= $admin_level ?></strong>. Gunakan panel ini untuk mengelola data alumni Sulselbar.</p>
+            </div>
+            <div class="col-md-4 text-end d-none d-md-block">
+                <i class="bi bi-shield-check" style="font-size: 4rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card p-3 h-100 content-fade delay-1">
+                <div class="icon-box bg-success-subtle text-success mb-3">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h6 class="text-muted small fw-bold">TOTAL ALUMNI</h6>
+                <h2 class="fw-bold mb-0"><?= number_format($total_alumni, 0, ',', '.'); ?></h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card p-3 h-100 content-fade delay-2">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="icon-box bg-warning-subtle text-warning">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <?php if($total_pending > 0): ?>
+                        <span class="badge bg-danger rounded-pill">Perlu Verifikasi</span>
+                    <?php endif; ?>
+                </div>
+                <h6 class="text-muted small fw-bold">MENUNGGU VERIFIKASI</h6>
+                <h2 class="fw-bold mb-0 text-danger"><?= number_format($total_pending, 0, ',', '.'); ?></h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card p-3 h-100 content-fade delay-3">
+                <div class="icon-box bg-info-subtle text-info mb-3">
+                    <i class="bi bi-newspaper"></i>
+                </div>
+                <h6 class="text-muted small fw-bold">JUMLAH BERITA</h6>
+                <h2 class="fw-bold mb-0"><?= number_format($total_berita, 0, ',', '.'); ?></h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card p-3 h-100 content-fade delay-3">
+                <div class="icon-box bg-primary-subtle text-primary mb-3">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <h6 class="text-muted small fw-bold">KUESIONER MASUK</h6>
+                <h2 class="fw-bold mb-0"><?= number_format($total_sudah_kuesioner, 0, ',', '.'); ?></h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card quick-actions-card p-4 border-0 shadow-sm content-fade delay-3">
+                <h6 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Aksi Cepat</h6>
+                <div class="d-flex gap-2">
+                    <a href="data_alumni.php" class="btn btn-success px-4">Kelola Alumni</a>
+                    <a href="kelola_berita.php" class="btn btn-success px-4">Input Berita Baru</a>
+                    <a href="admin_export.php" class="btn btn-outline-primary px-4">Unduh Laporan</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- JavaScript for Mobile Sidebar Toggle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const btn = document.getElementById('hamburgerBtn');
     const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
     
-    // Toggle sidebar on hamburger click
-    hamburgerBtn.addEventListener('click', function() {
+    btn.onclick = (e) => {
+        e.stopPropagation();
         sidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
-    });
-    
-    // Close sidebar when overlay is clicked
-    sidebarOverlay.addEventListener('click', function() {
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-    });
-    
-    // Close sidebar when menu item is clicked (for better UX on mobile)
-    const menuItems = document.querySelectorAll('.menu-item');
-    menuItems.forEach(item => {
-        item.addEventListener('click', function() {
-            if (window.innerWidth <= 991) {
-                sidebar.classList.remove('active');
-                sidebarOverlay.classList.remove('active');
-            }
-        });
-    });
+    };
+
+    document.onclick = (e) => {
+        if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
+            sidebar.classList.remove('active');
+        }
+    };
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -2,574 +2,199 @@
 session_start();
 include 'config/config.php';
 
+// Proteksi Halaman
 if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
     header("Location: login.php?error=not_logged_in");
     exit();
 }
+
 $id_alumni = $_SESSION['id_alumni'];
-$data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM tb_alumni WHERE id_alumni=$id_alumni"));
 
-// Ambil data pekerjaan alumni
-$pekerjaan = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM tb_pekerjaan WHERE id_alumni=$id_alumni"));
+// 1. Ambil data profil (Sesuai tb_alumni)
+$query_alumni = mysqli_query($conn, "SELECT * FROM tb_alumni WHERE id_alumni = '$id_alumni'");
+$data = mysqli_fetch_assoc($query_alumni);
 
-// Ambil data kuesioner alumni
-$kuesioner = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM tb_kuesioner WHERE id_alumni=$id_alumni"));
+// 2. Ambil data pekerjaan (Sesuai tb_pekerjaan)
+$query_pekerjaan = mysqli_query($conn, "SELECT * FROM tb_pekerjaan WHERE id_alumni = '$id_alumni' ORDER BY id_pekerjaan DESC LIMIT 1");
+$pekerjaan = mysqli_fetch_assoc($query_pekerjaan);
 
-$title = "Dashboard Alumni";
+// 3. Ambil data kuesioner (Sesuai tb_kuesioner)
+$query_kuesioner = mysqli_query($conn, "SELECT * FROM tb_kuesioner WHERE id_alumni = '$id_alumni' LIMIT 1");
+$kuesioner = mysqli_fetch_assoc($query_kuesioner);
+
+$title = "Dashboard Alumni - Tracer Study IKPM";
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <link rel="icon" type="image/png" href="assets/logo-uin.png">
+    <link rel="icon" type="image/png" href="assets/logo-ikpm2.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title><?= htmlspecialchars($title) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        html, body {
-            height: 100%;
-        }
-        body {
-            background: #f6fafd;
-            min-height: 100vh;
-            margin: 0;
-            font-family: 'Montserrat', Arial, sans-serif;
-            overflow-x: hidden;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f6fafd; min-height: 100vh; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        /* Navbar */
-        .navbar {
-            background: #e8f5e9 !important;
-            box-shadow: 0 2px 8px rgba(120,180,120,0.10) !important;
-            z-index: 1051;
-            min-height: 64px;
-            padding: 8px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-        }
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            color: #197948 !important;
-            font-weight: 700;
-            font-size: 1.25rem;
-            letter-spacing: .01em;
-        }
-        .navbar-brand img {
-            height: 40px;
-            width: 40px;
-            object-fit: contain;
-            border-radius: 6px;
-            border: none;
-            box-shadow: none;
-            background: transparent;
-        }
-        .navbar .nav-link {
-            color: #197948 !important;
-            font-weight: 600;
-            padding: 6px 12px;
-            border-radius: 6px;
-            transition: all .15s ease;
-        }
-        .navbar .nav-link:hover {
-            background: rgba(25,121,72,0.08);
-            color: #145a35 !important;
-        }
-        .navbar .nav-link.active {
-            background: #dcf8e5;
-            color: #145a35 !important;
-        }
+        .navbar { background: #e8f5e9 !important; border-bottom: 2px solid #197948; z-index: 1051; position: fixed; top: 0; width: 100%; }
+        .navbar-brand { color: #197948 !important; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .navbar-brand img { height: 35px; }
+
+        .sidebar { width: 265px; background: #fff; border-right: 1px solid #e4efea; position: fixed; top: 0; bottom: 0; padding-top: 80px; z-index: 1040; transition: 0.3s; }
+        .profile-box { text-align: center; padding: 20px; border-bottom: 1px solid #eee; margin-bottom: 15px; }
+        .profile-img { width: 85px; height: 85px; object-fit: cover; border-radius: 50%; border: 3px solid #197948; }
+        .profile-name { font-size: 1.1rem; font-weight: 700; color: #197948; margin-top: 10px; }
+        .profile-desc { font-size: 0.85rem; color: #666; }
+
+        .sidebar-link { display: flex; align-items: center; padding: 12px 25px; color: #444; text-decoration: none; transition: 0.2s; font-weight: 500; }
+        .sidebar-link:hover, .sidebar-link.active { background: #dcf8e5; color: #197948; }
+        .sidebar-link i { margin-right: 12px; font-size: 1.2rem; }
+
+        .main-content { margin-left: 265px; margin-top: 64px; padding: 40px; transition: 0.3s; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
-        /* Hamburger Button */
-        .hamburger-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: #197948;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px 10px;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            min-height: 100vh;
-            background: #fff;
-            border-right: 1.6px solid #e4efea;
-            padding: 0;
-            box-shadow: 0 1px 10px #3ead6130;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            z-index: 1040;
-            width: 265px;
-            display: flex;
-            flex-direction: column;
-            padding-top: 64px;
-            padding-bottom: 80px;
-            transition: transform 0.3s ease-in-out;
-            overflow-y: auto;
-        }
-        
-        .sidebar-content {
-            flex: 1;
-        }
-        
-        .profile-box {
-            text-align: center;
-            padding: 32px 20px 14px 20px;
-        }
-        .profile-img {
-            width: 92px;
-            height: 92px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 4px solid #e9f7ef;
-        }
-        .profile-name {
-            font-size: 1.14rem;
-            font-weight: 700;
-            margin-top: 8px;
-            color: #197948;
-        }
-        .profile-desc {
-            font-size: 1.01rem;
-            color: #7fa882;
-        }
-        
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            color: #222;
-            background: #f7fcfa;
-            border: none;
-            padding: 14px 28px;
-            margin-bottom: 4px;
-            border-radius: 8px 0 0 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: .18s;
-        }
-        .sidebar-link.active,
-        .sidebar-link:hover {
-            background: #dcf8e5;
-            color: #258B42;
-        }
-        .sidebar-link i {
-            font-size: 1.15rem;
-            margin-right: 11px;
-        }
-        
-        /* Logout Link - Hidden on mobile */
-        .logout-sidebar {
-            padding: 0 20px 20px 20px;
-            display: block;
-        }
-        
-        /* Logout Mobile (After Profile) - Hidden by default */
-        .logout-mobile {
-            display: none;
-            padding: 15px 20px;
-            margin-top: 10px;
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: 265px;
-            margin-top: 64px;
-            padding: 30px 38px;
-            min-height: calc(100vh - 64px);
-            transition: margin-left 0.3s ease-in-out;
-        }
-        
-        /* Cards */
-        .card {
-            border-radius: 16px;
-            box-shadow: 0 4px 14px rgba(34,139,34,0.07);
-        }
-        
-        .status-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            margin-right: 8px;
-        }
-        .status-complete {
-            background: #d1e7dd;
-            color: #0f5132;
-        }
-        .status-pending {
-            background: #fff3cd;
-            color: #664d03;
-        }
-        
-        /* Overlay */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1039;
-            transition: opacity 0.3s ease-in-out;
-        }
-        
-        /* Responsive */
+        .status-icon { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; }
+        .status-complete { background: #d1e7dd; color: #0f5132; }
+        .status-pending { background: #fff3cd; color: #664d03; }
+
         @media (max-width: 991px) {
-            .hamburger-btn {
-                display: block;
-            }
-            
-            .sidebar {
-                transform: translateX(-100%);
-                width: 100vw;
-                padding-bottom: 20px;
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .sidebar-overlay.active {
-                display: block;
-            }
-            
-            /* Hide desktop logout, show mobile logout */
-            .logout-sidebar {
-                display: none;
-            }
-            
-            .logout-mobile {
-                display: block;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 20px 20px;
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .navbar-brand {
-                font-size: 1.1rem;
-            }
-            .navbar-brand img {
-                height: 32px;
-                width: 32px;
-            }
-            .main-content {
-                padding: 16px 12px;
-            }
-            .profile-img {
-                width: 70px;
-                height: 70px;
-            }
-            .profile-name {
-                font-size: 1rem;
-            }
-            .profile-desc {
-                font-size: 0.9rem;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg fixed-top">
+<nav class="navbar navbar-expand-lg">
     <div class="container-fluid px-3">
-        <button class="hamburger-btn" id="hamburgerBtn">
-            <i class="bi bi-list"></i>
-        </button>
-        <a class="navbar-brand fw-bold" href="dashboard_alumni.php">
-            <img src="assets/logo-uin.png" alt="Logo"/>
-            Tracer Alumni
+        <button class="btn d-lg-none text-success" id="hamburgerBtn"><i class="bi bi-list fs-3"></i></button>
+        <a class="navbar-brand" href="#">
+            <img src="assets/logo-ikpm2.png" alt="Logo">
+            <span>Tracer Alumni IKPM</span>
         </a>
-        <!-- Menu navbar untuk desktop ONLY -->
-        <div class="d-none d-lg-flex ms-auto">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link active" href="dashboard_alumni.php">
-                        <i class="bi bi-house-door-fill"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="logout.php">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </a>
-                </li>
-            </ul>
+        <div class="ms-auto d-none d-lg-block">
+            <span class="badge bg-success-subtle text-success p-2">Status: <?= $data['status_verifikasi'] ?></span>
         </div>
     </div>
 </nav>
 
-<!-- Sidebar Overlay -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-content">
-        <div class="profile-box">
-            <?php
-            $foto_path = 'assets/profile_placeholder.png';
-            if (!empty($data['foto']) && file_exists($data['foto'])) {
-                $foto_path = $data['foto'];
-            }
-            ?>
-            <img src="<?= htmlspecialchars($foto_path) ?>" class="profile-img" alt="Foto Alumni">
-            <div class="profile-name"><?= htmlspecialchars($data['nama_lengkap']) ?></div>
-            <div class="profile-desc">Alumni<br><?= htmlspecialchars($data['program_studi']) ?></div>
-        </div>
-        
-        <!-- Logout Mobile (After Profile) -->
-        <div class="logout-mobile">
-            <a href="logout.php" class="btn btn-outline-danger btn-sm w-100">
-                <i class="bi bi-box-arrow-right me-1"></i>Logout
-            </a>
-        </div>
-        
-        <div>
-            <a href="dashboard_alumni.php" class="sidebar-link active">
-                <i class="bi bi-house-door-fill"></i> Dashboard
-            </a>
-            <a href="profil.php" class="sidebar-link">
-                <i class="bi bi-person-badge-fill"></i> Informasi Pribadi
-            </a>
-            <a href="pekerjaan.php" class="sidebar-link">
-                <i class="bi bi-briefcase-fill"></i> Data Pekerjaan
-            </a>
-            <a href="kuesioner.php" class="sidebar-link">
-                <i class="bi bi-list-task"></i> Isi Kuesioner
-            </a>
-        </div>
+    <div class="profile-box">
+        <?php $foto = (!empty($data['foto']) && file_exists($data['foto'])) ? $data['foto'] : 'assets/profile_placeholder.jpg'; ?>
+        <img src="<?= $foto ?>" class="profile-img">
+        <div class="profile-name"><?= htmlspecialchars(explode(' ', $data['nama_lengkap'])[0]) ?></div>
+        <div class="profile-desc">Marhalah <?= htmlspecialchars($data['marhalah']) ?></div>
+        <div class="profile-desc text-muted small">Stambuk: <?= htmlspecialchars($data['stambuk']) ?></div>
     </div>
     
-    <!-- Logout Desktop (Bottom) -->
-    <div class="logout-sidebar">
-        <a href="logout.php" class="sidebar-link text-danger">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
+    <div class="nav-links">
+        <a href="dashboard_alumni.php" class="sidebar-link active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a href="profil.php" class="sidebar-link"><i class="bi bi-person-circle"></i> Profil Pribadi</a>
+        <a href="pekerjaan.php" class="sidebar-link"><i class="bi bi-briefcase-fill"></i> Aktivitas/Khidmah</a>
+        <a href="kuesioner.php" class="sidebar-link"><i class="bi bi-file-earmark-text-fill"></i> Kuesioner</a>
+        <hr class="mx-3">
+        <a href="logout.php" class="sidebar-link text-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
     </div>
 </div>
 
-<!-- Main Content -->
 <div class="main-content">
-    <h4 class="fw-bold text-success mb-4">Beranda</h4>
-    
-    <div class="card mb-4 p-4">
-        <h2 class="fw-bold mb-2">Selamat Datang, <?= htmlspecialchars(explode(' ', $data['nama_lengkap'])[0] ?? 'Alumni') ?>!</h2>
-        <div style="font-size:1.06rem;">
-            <p>Selamat datang di sistem tracer alumni. Di sini Anda bisa memperbarui data pribadi, mengisi data pekerjaan, dan mengisi kuesioner tracer study secara online untuk membantu kampus dalam evaluasi kualitas pendidikan alumni.</p>
+    <div class="mb-4">
+        <h3 class="fw-bold">Ahlan wa Sahlan, Gontori!</h3>
+        <p class="text-muted">Pantau status tracer alumni dan lengkapi data khidmah Anda.</p>
+    </div>
+
+    <div class="card mb-4 bg-success text-white p-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4>Selamat Datang, <?= htmlspecialchars($data['nama_lengkap']) ?></h4>
+                <p class="mb-0 opacity-75">Data Anda membantu kami memetakan persebaran alumni IKPM Gontor dan meningkatkan kualitas pelayanan organisasi.</p>
+            </div>
+            <div class="col-md-4 text-end d-none d-md-block">
+                <i class="bi bi-mortarboard" style="font-size: 4rem; opacity: 0.3;"></i>
+            </div>
         </div>
     </div>
 
-    <!-- Area info cards -->
     <div class="row g-3 mb-4">
-        <!-- Card Status Pekerjaan -->
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-4">
             <div class="card p-3 h-100">
+                <h6 class="fw-bold text-muted small mb-3">DATA PRIBADI</h6>
                 <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-briefcase-fill text-success me-2" style="font-size: 1.2rem;"></i>
-                    <h6 class="mb-0 fw-bold">Status Pekerjaan</h6>
+                    <span class="status-icon status-complete"><i class="bi bi-check-lg"></i></span>
+                    <span class="fw-bold">Terdaftar</span>
                 </div>
+                <p class="small text-muted mb-3">Konsulat: <?= htmlspecialchars($data['konsulat']) ?></p>
+                <a href="profil.php" class="btn btn-outline-success btn-sm mt-auto">Update Profil</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3 h-100">
+                <h6 class="fw-bold text-muted small mb-3">STATUS AKTIVITAS</h6>
                 <?php if ($pekerjaan): ?>
                     <div class="d-flex align-items-center mb-2">
-                        <span class="status-icon status-complete">
-                            <i class="bi bi-check"></i>
-                        </span>
-                        <strong><?= htmlspecialchars($pekerjaan['status_pekerjaan']) ?></strong>
+                        <span class="status-icon status-complete"><i class="bi bi-check-lg"></i></span>
+                        <span class="fw-bold"><?= htmlspecialchars($pekerjaan['status_aktivitas']) ?></span>
                     </div>
-                    <?php if ($pekerjaan['nama_perusahaan']): ?>
-                        <p class="mb-1 text-muted small">
-                            <i class="bi bi-building me-1"></i>
-                            <?= htmlspecialchars($pekerjaan['nama_perusahaan']) ?>
-                        </p>
-                    <?php endif; ?>
-                    <?php if ($pekerjaan['jabatan']): ?>
-                        <p class="mb-1 text-muted small">
-                            <i class="bi bi-person-badge me-1"></i>
-                            <?= htmlspecialchars($pekerjaan['jabatan']) ?>
-                        </p>
-                    <?php endif; ?>
-                    <div class="mt-auto pt-2">
-                        <a href="pekerjaan.php" class="btn btn-outline-success btn-sm w-100">
-                            <i class="bi bi-pencil-square me-1"></i>Perbarui Data
-                        </a>
-                    </div>
+                    <p class="small text-muted mb-3"><?= htmlspecialchars($pekerjaan['nama_instansi'] ?? 'Di Instansi/Pondok') ?></p>
+                    <a href="pekerjaan.php" class="btn btn-outline-success btn-sm mt-auto">Lihat Detail</a>
                 <?php else: ?>
                     <div class="d-flex align-items-center mb-2">
-                        <span class="status-icon status-pending">
-                            <i class="bi bi-clock"></i>
-                        </span>
-                        <span class="text-muted">Belum mengisi data pekerjaan</span>
+                        <span class="status-icon status-pending"><i class="bi bi-exclamation"></i></span>
+                        <span class="text-muted">Belum Diisi</span>
                     </div>
-                    <p class="mb-0 text-muted small">Lengkapi data pekerjaan Anda untuk tracer study.</p>
-                    <div class="mt-auto pt-2">
-                        <a href="pekerjaan.php" class="btn btn-success btn-sm w-100">
-                            <i class="bi bi-plus-circle me-1"></i>Isi Data Pekerjaan
-                        </a>
-                    </div>
+                    <p class="small text-muted mb-3">Mohon isi data pekerjaan/studi Anda.</p>
+                    <a href="pekerjaan.php" class="btn btn-success btn-sm mt-auto">Isi Sekarang</a>
                 <?php endif; ?>
             </div>
         </div>
 
-        <!-- Card Status Kuesioner -->
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-4">
             <div class="card p-3 h-100">
-                <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-list-task text-success me-2" style="font-size: 1.2rem;"></i>
-                    <h6 class="mb-0 fw-bold">Status Kuesioner</h6>
-                </div>
+                <h6 class="fw-bold text-muted small mb-3">KUESIONER</h6>
                 <?php if ($kuesioner): ?>
                     <div class="d-flex align-items-center mb-2">
-                        <span class="status-icon status-complete">
-                            <i class="bi bi-check"></i>
-                        </span>
-                        <span>Sudah mengisi kuesioner</span>
+                        <span class="status-icon status-complete"><i class="bi bi-check-lg"></i></span>
+                        <span class="fw-bold">Selesai</span>
                     </div>
-                    <p class="mb-0 text-muted small">Terima kasih telah mengisi kuesioner tracer study.</p>
-                    <div class="mt-auto pt-2">
-                        <a href="kuesioner.php" class="btn btn-outline-success btn-sm w-100">
-                            <i class="bi bi-pencil-square me-1"></i>Perbarui Kuesioner
-                        </a>
-                    </div>
+                    <p class="small text-muted mb-3">Diisi pada: <?= date('d/m/Y', strtotime($kuesioner['tanggal_isi'])) ?></p>
+                    <a href="kuesioner.php" class="btn btn-outline-success btn-sm mt-auto">Lihat Jawaban</a>
                 <?php else: ?>
                     <div class="d-flex align-items-center mb-2">
-                        <span class="status-icon status-pending">
-                            <i class="bi bi-clock"></i>
-                        </span>
-                        <span class="text-muted">Belum mengisi kuesioner</span>
+                        <span class="status-icon status-pending"><i class="bi bi-clock"></i></span>
+                        <span class="text-muted">Menunggu</span>
                     </div>
-                    <p class="mb-0 text-muted small">Mohon bantu kampus dengan mengisi kuesioner tracer study.</p>
-                    <div class="mt-auto pt-2">
-                        <a href="kuesioner.php" class="btn btn-success btn-sm w-100">
-                            <i class="bi bi-plus-circle me-1"></i>Isi Kuesioner
-                        </a>
-                    </div>
+                    <p class="small text-muted mb-3">Evaluasi kebermanfaatan organisasi.</p>
+                    <a href="kuesioner.php" class="btn btn-success btn-sm mt-auto">Mulai Isi</a>
                 <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Card Informasi Profil -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card p-3 h-100">
-                <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-person-badge-fill text-success me-2" style="font-size: 1.2rem;"></i>
-                    <h6 class="mb-0 fw-bold">Informasi Profil</h6>
-                </div>
-                <div class="d-flex align-items-center mb-2">
-                    <span class="status-icon status-complete">
-                        <i class="bi bi-check"></i>
-                    </span>
-                    <span>Data profil tersimpan</span>
-                </div>
-                <p class="mb-0 text-muted small">Perbarui informasi pribadi Anda agar data tracer lebih akurat.</p>
-                <div class="mt-auto pt-2">
-                    <a href="profil.php" class="btn btn-outline-success btn-sm w-100">
-                        <i class="bi bi-pencil-square me-1"></i>Perbarui Profil
-                    </a>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Progress Card -->
     <div class="card p-4">
-        <h5 class="fw-bold mb-3">
-            <i class="bi bi-graph-up me-2 text-success"></i>Progress Tracer Study
-        </h5>
+        <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill me-2 text-success"></i>Kelengkapan Tracer Study</h6>
         <?php 
-        $progress = 0;
-        $total_steps = 3;
-        
-        // Hitung progress
-        $progress++; // Profil selalu ada karena sudah login
-        if ($pekerjaan) $progress++;
-        if ($kuesioner) $progress++;
-        
-        $percentage = ($progress / $total_steps) * 100;
+            $steps = 1; // 1 = Registrasi/Profil
+            if ($pekerjaan) $steps++;
+            if ($kuesioner) $steps++;
+            $percent = ($steps / 3) * 100;
         ?>
-        
-        <div class="progress mb-3" style="height: 10px;">
-            <div class="progress-bar bg-success" role="progressbar" style="width: <?= $percentage ?>%" aria-valuenow="<?= $percentage ?>" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress mb-3" style="height: 12px; border-radius: 10px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: <?= $percent ?>%"></div>
         </div>
-        
-        <div class="row text-center">
-            <div class="col-4">
-                <div class="d-flex flex-column align-items-center">
-                    <i class="bi bi-person-badge-fill text-success mb-1" style="font-size: 1.5rem;"></i>
-                    <small class="fw-bold text-success">Profil</small>
-                    <small class="text-muted">Lengkap</small>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="d-flex flex-column align-items-center">
-                    <i class="bi bi-briefcase-fill <?= $pekerjaan ? 'text-success' : 'text-muted' ?> mb-1" style="font-size: 1.5rem;"></i>
-                    <small class="fw-bold <?= $pekerjaan ? 'text-success' : 'text-muted' ?>">Pekerjaan</small>
-                    <small class="text-muted"><?= $pekerjaan ? 'Lengkap' : 'Belum diisi' ?></small>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="d-flex flex-column align-items-center">
-                    <i class="bi bi-list-task <?= $kuesioner ? 'text-success' : 'text-muted' ?> mb-1" style="font-size: 1.5rem;"></i>
-                    <small class="fw-bold <?= $kuesioner ? 'text-success' : 'text-muted' ?>">Kuesioner</small>
-                    <small class="text-muted"><?= $kuesioner ? 'Lengkap' : 'Belum diisi' ?></small>
-                </div>
-            </div>
-        </div>
-        
-        <div class="text-center mt-3">
-            <strong>Progress: <?= $progress ?>/<?= $total_steps ?> (<?= round($percentage) ?>%)</strong>
+        <div class="d-flex justify-content-between">
+            <span class="small fw-bold text-success"><?= round($percent) ?>% Selesai</span>
+            <span class="small text-muted"><?= $steps ?> dari 3 Tahap</span>
         </div>
     </div>
 </div>
 
-<!-- JavaScript -->
 <script>
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const btn = document.getElementById('hamburgerBtn');
     const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    
-    // Toggle sidebar
-    hamburgerBtn.addEventListener('click', function() {
-        sidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
-    });
-    
-    // Close sidebar when overlay clicked
-    sidebarOverlay.addEventListener('click', function() {
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-    });
-    
-    // Close sidebar when menu item clicked (mobile)
-    const sidebarLinks = document.querySelectorAll('.sidebar-link');
-    sidebarLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth <= 991) {
-                sidebar.classList.remove('active');
-                sidebarOverlay.classList.remove('active');
-            }
-        });
-    });
+    btn.onclick = () => sidebar.classList.toggle('active');
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

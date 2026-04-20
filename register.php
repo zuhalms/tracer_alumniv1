@@ -1,5 +1,5 @@
 <?php
-$title = "Register Alumni - Tracer Alumni Kampus";
+$title = "Tracer Alumni | IKPM Gontor";
 include 'includes/header.php';
 ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
@@ -34,13 +34,14 @@ function togglePassword(id, btn) {
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 40px 0; /* Memberi ruang agar tidak terpotong di layar kecil */
     }
     .register-card {
         background: rgba(255,255,255,0.94);
         border-radius: 18px;
         box-shadow: 0 8px 32px rgba(38, 70, 44, 0.15);
         padding: 40px 32px;
-        max-width: 460px;
+        max-width: 480px;
         width: 100%;
         margin: 20px;
         color: #257a41;
@@ -48,13 +49,19 @@ function togglePassword(id, btn) {
     .register-title {
         font-weight: 800;
         font-size: 2rem;
-        margin-bottom: 26px;
+        margin-bottom: 10px;
         color: #229954;
         text-align: center;
     }
     .form-label {
         font-weight: 600;
         color: #1e593e;
+    }
+    /* Style Bintang Merah */
+    .required-label::after {
+        content: " *";
+        color: #e74c3c;
+        font-weight: bold;
     }
     .form-control {
         border-radius: 8px;
@@ -70,6 +77,7 @@ function togglePassword(id, btn) {
         box-shadow: 0 2px 12px rgba(38, 70, 44, 0.18);
         width: 100%;
         margin-top: 18px;
+        border: none;
     }
     .btn-green:hover {
         background: #229954;
@@ -78,81 +86,93 @@ function togglePassword(id, btn) {
     .alert {
         margin-bottom: 18px;
     }
+    .mandatory-info {
+        font-size: 0.8rem;
+        color: #e74c3c;
+        text-align: right;
+        margin-bottom: 15px;
+    }
 </style>
 
 <div class="register-bg">
     <div class="register-card shadow">
         <div class="register-title">Registrasi Alumni</div>
+        <p class="text-center text-muted mb-4 small">Ikatan Keluarga Pondok Modern Gontor</p>
 
         <?php
         if (isset($_GET['error'])) {
-            echo '<div class="alert alert-danger">';
+            echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
             switch ($_GET['error']) {
-                case 'password_mismatch':
-                    echo 'Password dan konfirmasi tidak cocok.';
-                    break;
-                case 'nim_exist':
-                    echo 'NIM sudah terdaftar.';
-                    break;
-                case 'email_exist':
-                    echo 'Email sudah terdaftar.';
-                    break;
-                case 'failed':
-                    echo 'Registrasi gagal. Coba lagi.';
-                    break;
+                case 'password_mismatch': echo 'Password dan konfirmasi tidak cocok.'; break;
+                case 'nim_exist': echo 'NIM sudah terdaftar.'; break;
+                case 'email_exist': echo 'Email sudah terdaftar.'; break;
+                case 'failed': echo 'Registrasi gagal. Coba lagi.'; break;
+                default: echo 'Terjadi kesalahan sistem.'; break;
             }
-            echo '</div>';
+            echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
         }
         ?>
 
+        <div class="mandatory-info">(*) Wajib diisi</div>
+
         <form action="proses_register.php" method="POST" autocomplete="off">
             <div class="mb-3">
-                <label for="nim" class="form-label">NIM</label>
-                <input type="text" id="nim" name="nim" class="form-control" required placeholder="Masukkan NIM" />
+                <label for="nim" class="form-label required-label">Stambuk/NIW</label>
+                <input type="text" id="nim" name="nim" class="form-control" required placeholder="Masukkan Stambuk/NIW" />
             </div>
+            
             <div class="mb-3">
-                <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
-                <input type="text" id="nama_lengkap" name="nama_lengkap" class="form-control" required placeholder="Nama Anda" />
+                <label for="nama_lengkap" class="form-label required-label">Nama Lengkap</label>
+                <input type="text" id="nama_lengkap" name="nama_lengkap" class="form-control" required placeholder="Nama lengkap sesuai ijazah" />
             </div>
-            <div class="mb-3">
-                <label for="fakultas" class="form-label">Fakultas</label>
-                <input type="text" id="fakultas" name="fakultas" class="form-control" required placeholder="Fakultas" />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="tahun_masuk" class="form-label required-label">Tahun Masuk</label>
+                    <input type="number" id="tahun_masuk" name="tahun_masuk" class="form-control" required placeholder="Tahun" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="tahun_lulus" class="form-label required-label">Tahun Lulus</label>
+                    <input type="number" id="tahun_lulus" name="tahun_lulus" class="form-control" required placeholder="Marhalah" />
+                </div>
             </div>
+
             <div class="mb-3">
-                <label for="program_studi" class="form-label">Program Studi</label>
-                <input type="text" id="program_studi" name="program_studi" class="form-control" required placeholder="Program Studi" />
-            </div>
-            <div class="mb-3">
-                <label for="tahun_masuk" class="form-label">Tahun Masuk</label>
-                <input type="number" id="tahun_masuk" name="tahun_masuk" class="form-control" required placeholder="Tahun Masuk" />
-            </div>
-            <div class="mb-3">
-                <label for="tahun_lulus" class="form-label">Tahun Lulus</label>
-                <input type="number" id="tahun_lulus" name="tahun_lulus" class="form-control" required placeholder="Tahun Lulus" />
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="email" class="form-label required-label">Email</label>
                 <input type="email" id="email" name="email" class="form-control" required placeholder="Email aktif" />
             </div>
+
             <div class="mb-3">
-                <label for="no_hp" class="form-label">No. HP</label>
-                <input type="text" id="no_hp" name="no_hp" class="form-control" required placeholder="Nomor HP" />
+                <label for="no_hp" class="form-label required-label">No. HP (WhatsApp)</label>
+                <input type="tel" id="no_hp" name="no_hp" class="form-control" required placeholder="Contoh: 08123456789" />
             </div>
+
             <div class="mb-3">
-                <label for="alamat" class="form-label">Alamat</label>
-                <textarea id="alamat" name="alamat" rows="2" class="form-control" required placeholder="Alamat lengkap"></textarea>
+                <label for="alamat" class="form-label required-label">Alamat Domisili</label>
+                <textarea id="alamat" name="alamat" rows="2" class="form-control" required placeholder="Alamat lengkap saat ini"></textarea>
             </div>
+
             <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
+                <label class="form-label required-label">Konsulat (Cabang Asal)</label>
+                <select name="konsulat" class="form-select" required>
+                    <option value="">-- Pilih Konsulat --</option>
+                    <option value="Konsulat Sulawesi Selatan">Konsulat Sulawesi Selatan</option>
+                    <option value="Konsulat Sulawesi Barat">Konsulat Sulawesi Barat</option>
+                    </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label required-label">Password</label>
                 <div class="input-group">
-                    <input type="password" id="password" name="password" class="form-control" required placeholder="Buat password" />
+                    <input type="password" id="password" name="password" class="form-control" required placeholder="Buat password (min. 6 karakter)" minlength="6" />
                     <button type="button" class="btn btn-outline-secondary" tabindex="-1" onclick="togglePassword('password', this)">
                         <span class="bi bi-eye"></span>
                     </button>
                 </div>
             </div>
+
             <div class="mb-3">
-                <label for="konfirmasi_password" class="form-label">Konfirmasi Password</label>
+                <label for="konfirmasi_password" class="form-label required-label">Konfirmasi Password</label>
                 <div class="input-group">
                     <input type="password" id="konfirmasi_password" name="konfirmasi_password" class="form-control" required placeholder="Ulangi password" />
                     <button type="button" class="btn btn-outline-secondary" tabindex="-1" onclick="togglePassword('konfirmasi_password', this)">
@@ -160,11 +180,12 @@ function togglePassword(id, btn) {
                     </button>
                 </div>
             </div>
-            <button type="submit" class="btn btn-green">Daftar</button>
+
+            <button type="submit" class="btn btn-green shadow-sm">Daftar Sekarang</button>
         </form>
 
-        <div class="mt-3 small text-center text-success">
-            Sudah punya akun? <a href="login.php" class="text-success">Login di sini</a>
+        <div class="mt-4 small text-center">
+            <span class="text-muted">Sudah punya akun?</span> <a href="login.php" class="text-success fw-bold text-decoration-none">Login di sini</a>
         </div>
     </div>
 </div>
