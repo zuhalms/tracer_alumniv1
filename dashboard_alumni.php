@@ -72,7 +72,7 @@ $title = "Dashboard Alumni - Tracer Study IKPM";
         <button class="btn d-lg-none text-success" id="hamburgerBtn"><i class="bi bi-list fs-3"></i></button>
         <a class="navbar-brand" href="#">
             <img src="assets/logo-ikpm2.png" alt="Logo">
-            <span>Tracer Alumni IKPM</span>
+            <span>Tracer Alumni - IKPM Gontor</span>
         </a>
         <div class="ms-auto d-none d-lg-block">
             <span class="badge bg-success-subtle text-success p-2">Status: <?= $data['status_verifikasi'] ?></span>

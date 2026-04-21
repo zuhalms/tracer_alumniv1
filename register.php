@@ -1,5 +1,5 @@
 <?php
-$title = "Tracer Alumni | IKPM Gontor";
+$title = "Registrasi Alumni | IKPM Gontor";
 include 'includes/header.php';
 ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>

@@ -73,7 +73,7 @@ if (session_status() == PHP_SESSION_NONE) {
         <div class="brand-logo">
             <img src="assets/logo-ikpm2.png" alt="Logo IKPM Gontor" />
             <div class="brand-title">
-                <span>TRACER ALUMNI IKPM GONTOR</span>
+                <span>Ikatan Keluarga Pondok Modern</span>
                 <span style="font-size:.85rem;font-weight:400;">Sulawesi Selatan & Sulawesi Barat</span>
             </div>
         </div>

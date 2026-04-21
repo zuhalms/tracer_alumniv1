@@ -4,7 +4,7 @@
     <link rel="icon" type="image/png" href="assets/logo-ikpm2.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tracer Alumni | IKPM Gontor </title>
+    <title> IKPM Gontor </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
     <style>
@@ -238,8 +238,8 @@
             <div class="brand-logo">
                 <img src="assets/logo-ikpm2.png" alt="Logo IKPM" />
                 <div class="brand-title-container">
-                    <span class="brand-title">TRACER ALUMNI IKPM GONTOR</span>
-                    <span class="brand-subtitle"> Wilayah Sulawesi Selatan & Sulawesi Barat</span>
+                    <span class="brand-title">Ikatan Keluarga Pondok Modern Gontor</span>
+                    <span class="brand-subtitle">  Sulawesi Selatan & Sulawesi Barat</span>
                 </div>
             </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -258,9 +258,9 @@
     </nav>
 
     <main class="hero-section">
-        <h1 class="hero-title">Tracer Alumni</h1>
+        <h1 class="hero-title">Portal Resmi IKPM Gontor Sulselbar</h1>
         <div class="subtitle">
-            Platform pendataan dan pemetaan kiprah alumni untuk mendukung sinergi potensi, keberlanjutan program kerja, serta penguatan jaringan ukhuwwah di lingkungan keluarga besar IKPM Gontor Sulawesi Selatan & Barat.
+            Pusat informasi dan dokumentasi kegiatan Alumni IKPM Gontor di wilayah Sulawesi Selatan & Barat. Wadah sinergi untuk mengenal lebih dekat kiprah, program kerja, serta jaringan persaudaraan keluarga besar alumni bagi masyarakat luas.
         </div>
         <a href="login.php" class="btn btn-main">Masuk ke Sistem</a>
     </main>

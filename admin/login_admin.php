@@ -79,8 +79,11 @@ $password = trim($_POST['password']); // Fungsi trim() ini penting untuk hapus s
             justify-content: center;
             font-family: 'Inter', sans-serif;
             color: #1f2937;
-            background: linear-gradient(135deg, #1abc9c 0%, #27ae60 100%);
-            overflow: hidden;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(255,255,255,0.22), transparent 34%),
+                radial-gradient(circle at 90% 85%, rgba(255,255,255,0.14), transparent 30%),
+                linear-gradient(145deg, #1f7348 0%, #2f9e68 55%, #1c5b38 100%);
+            overflow-x: hidden;
             position: relative;
         }
         body::before,
@@ -89,142 +92,99 @@ $password = trim($_POST['password']); // Fungsi trim() ini penting untuk hapus s
             position: fixed;
             border-radius: 50%;
             pointer-events: none;
-            opacity: 0.15;
-            filter: blur(6px);
+            opacity: 0.12;
+            filter: blur(4px);
         }
         body::before {
-            width: 360px;
-            height: 360px;
-            top: -120px;
-            right: -100px;
-            background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%);
+            width: 260px;
+            height: 260px;
+            top: -90px;
+            right: -90px;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
         }
         body::after {
-            width: 280px;
-            height: 280px;
-            left: -90px;
-            bottom: -100px;
-            background: radial-gradient(circle, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 72%);
+            width: 200px;
+            height: 200px;
+            left: -70px;
+            bottom: -70px;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 72%);
         }
         .login-shell {
-            width: min(100%, 980px);
+            width: min(100%, 540px);
             padding: 24px;
             position: relative;
             z-index: 1;
         }
         .login-card {
-            display: grid;
-            grid-template-columns: 1.05fr 0.95fr;
-            min-height: 560px;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 28px;
+            min-height: 0;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 24px 60px rgba(10, 60, 30, 0.2);
+            box-shadow: 0 18px 44px rgba(10, 60, 30, 0.16);
             backdrop-filter: blur(8px);
         }
-        .login-visual {
-            position: relative;
-            padding: 42px;
-            color: #fff;
-            background: linear-gradient(160deg, rgba(19, 121, 72, 0.98), rgba(26, 188, 156, 0.88));
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-        }
-        .login-visual::before {
-            content: '';
-            position: absolute;
-            inset: auto -60px -120px auto;
-            width: 260px;
-            height: 260px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.08);
-        }
-        .login-visual::after {
-            content: '';
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            width: 120px;
-            height: 120px;
-            border-radius: 28px;
-            border: 1px solid rgba(255,255,255,0.14);
-            transform: rotate(14deg);
-        }
-        .brand-row {
-            position: relative;
-            z-index: 1;
-        }
-        .brand-row img {
-            width: 64px;
-            height: 64px;
-            object-fit: contain;
-            margin-bottom: 18px;
-        }
-        .brand-kicker {
-            font-size: 0.85rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            opacity: 0.82;
-            margin-bottom: 10px;
-        }
-        .brand-title {
-            font-size: 2rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 12px;
-        }
-        .brand-desc {
-            max-width: 420px;
-            color: #ecffef;
-            line-height: 1.75;
-            margin-bottom: 0;
-        }
-        .visual-stats {
-            position: relative;
-            z-index: 1;
-            display: grid;
-            gap: 14px;
-            margin-top: 28px;
-        }
-        .visual-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            width: fit-content;
-            padding: 10px 16px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #f4fff6;
-            font-weight: 600;
-        }
-        .visual-note {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.7;
-            margin: 0;
-        }
         .login-form-panel {
-            padding: 44px 38px;
+            padding: 28px;
             background: rgba(255, 255, 255, 0.98);
-            display: flex;
-            align-items: center;
         }
         .login-box {
             width: 100%;
         }
-        .login-logo {
+        .brand-inline {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
-        .login-logo img { width: 46px; height: 46px; object-fit: contain; }
-        .back-link { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; color: #197948; text-decoration: none; font-weight: 700; }
-        .back-link:hover { color: #155c29; }
+        .brand-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            flex: 0 0 auto;
+            filter: drop-shadow(0 4px 8px rgba(25, 121, 72, 0.22));
+        }
+        .org-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.4;
+            margin: 0;
+            color: #154d30;
+        }
+        .org-region {
+            margin: 2px 0 0;
+            font-size: 0.78rem;
+            color: #5f7d6d;
+            letter-spacing: 0.04em;
+        }
+        .login-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            line-height: 1.25;
+            margin: 0 0 6px;
+            color: #154d30;
+            text-align: center;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            color: #197948;
+            text-decoration: none;
+            font-weight: 600;
+            background: rgba(25, 121, 72, 0.07);
+            border: 1px solid rgba(25, 121, 72, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #155c29;
+            background: rgba(25, 121, 72, 0.12);
+            border-color: rgba(25, 121, 72, 0.22);
+            transform: translateY(-1px);
+        }
         .form-control {
             border-radius: 14px;
             border: 1px solid #d8e7dd;
@@ -244,58 +204,40 @@ $password = trim($_POST['password']); // Fungsi trim() ini penting untuk hapus s
             transform: translateY(-2px);
             box-shadow: 0 14px 28px rgba(25, 121, 72, 0.22);
         }
-        .login-subtitle {
-            color: #64748b;
-            line-height: 1.7;
-            margin-bottom: 26px;
-        }
         .alert {
             border-radius: 14px;
         }
         @media (max-width: 991.98px) {
             body { overflow-y: auto; }
             .login-shell { padding: 16px; }
-            .login-card { grid-template-columns: 1fr; min-height: auto; }
-            .login-visual { padding: 30px 24px; }
-            .login-form-panel { padding: 32px 24px 34px; }
-            .brand-title { font-size: 1.6rem; }
+            .login-form-panel { padding: 24px 20px 26px; }
         }
         @media (max-width: 575.98px) {
             .login-shell { padding: 12px; }
-            .login-visual { padding: 24px 20px; }
-            .login-form-panel { padding: 24px 18px 26px; }
-            .brand-title { font-size: 1.35rem; }
-            .brand-desc { font-size: 0.95rem; }
+            .login-form-panel { padding: 20px 14px 22px; }
+            .brand-inline { align-items: center; }
+            .org-name { font-size: 0.95rem; }
+            .org-region { font-size: 0.72rem; }
+            .login-title { font-size: 1.2rem; }
+            .back-link { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
     <div class="login-shell">
         <div class="login-card">
-            <section class="login-visual d-none d-lg-flex">
-                <div class="brand-row">
-                    <img src="../assets/logo-ikpm2.png" alt="Logo IKPM"/>
-                    <div class="brand-kicker">Tracer Alumni IKPM Gontor</div>
-                    <div class="brand-title">Admin Control Center</div>
-                    <p class="brand-desc">Masuk untuk mengelola data alumni, berita, dan verifikasi.</p>
-                </div>
-                <div class="visual-stats">
-                    <div class="visual-chip"><i class="bi bi-shield-lock-fill"></i> Akses aman untuk admin</div>
-   
-                </div>
-            </section>
-
             <section class="login-form-panel">
                 <div class="login-box">
                     <a href="../index.php" class="back-link"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
-                    <div class="login-logo">
-                        <img src="../assets/logo-ikpm2.png" alt="Logo IKPM"/>
+                    <div class="brand-inline">
+                        <img src="../assets/logo-ikpm2.png" alt="Logo IKPM" class="brand-logo"/>
                         <div>
-                            <div class="fw-bold fs-4 text-success">Tracer Admin</div>
-                            <div class="small text-muted">Akses Administrator</div>
+                            <p class="org-name">Ikatan Keluarga Pondok Modern Gontor</p>
+                            <p class="org-region">Sulawesi Selatan dan Sulawesi Barat</p>
                         </div>
                     </div>
-                    <p class="login-subtitle">Silakan masuk menggunakan akun admin untuk mengelola data tracer alumni.</p>
+                    <h1 class="login-title">Login Admin</h1>
+                  
                     
                     <?php if (!empty($error)): ?>
                         <div class="alert alert-danger alert-dismissible fade show small" role="alert">

@@ -8,7 +8,7 @@ if (session_status() == PHP_SESSION_NONE) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><?= isset($title) ? htmlspecialchars($title) : 'Tracer Alumni | IKPM Gontor' ?></title>
+    <title><?= isset($title) ? htmlspecialchars($title) : 'IKPM Gontor' ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
     <style>
@@ -38,7 +38,7 @@ if (session_status() == PHP_SESSION_NONE) {
 <body>
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="dashboard_alumni.php">Tracer Alumni Dashboard</a>
+        <a class="navbar-brand fw-bold" href="dashboard_alumni.php">IKPM Gontor</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDashboard" aria-controls="navbarNavDashboard" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>

@@ -215,8 +215,8 @@
             <div class="brand-logo">
                 <img src="assets/logo-ikpm2.png" alt="Logo IKPM" />
                 <div class="brand-title-container">
-                    <span class="brand-title">TRACER ALUMNI IKPM GONTOR</span>
-                    <span class="brand-subtitle"> Wilayah Sulawesi Selatan & Sulawesi Barat</span>
+                    <span class="brand-title">Ikatan Keluarga Pondok Modern</span>
+                    <span class="brand-subtitle">Sulawesi Selatan & Sulawesi Barat</span>
                 </div>
             </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
