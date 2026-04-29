@@ -20,51 +20,49 @@ if (session_status() == PHP_SESSION_NONE) {
             font-family: 'Montserrat', Arial, sans-serif;
         }
         .main-navbar {
-            background: transparent;
-            box-shadow: none;
-            padding-top: 18px;
-            padding-bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            z-index: 1050;
         }
-        /* Penyesuaian agar logo dan teks sejajar tengah (vertikal) */
         .brand-logo {
             display: flex;
-            align-items: center; 
+            align-items: center;
         }
-        /* Update bagian ini di dalam tag <style> */
-        .brand-logo img { 
-            width: 60px; 
-            height: auto; 
-            margin-right: 20px; /* Ditambah agar teks di sampingnya lebih berjarak ke kanan */
-            
-            /* Tambahkan dua baris di bawah ini */
-            transform: translateY(-10px); /* Angka minus untuk menggeser ke ATAS */
-            margin-left: 10px;           /* Angka positif untuk menggeser ke KANAN */
+        .brand-logo img {
+            width: 65px;
+            height: 50px;
+            margin-right: 8px;
+            top: -8px;
+            position: relative;
         }
         .brand-title {
-            font-weight: 700;
-            font-size: 1.2rem;
-            letter-spacing: .5px;
+            font-weight: 800;
+            font-size: 1.1rem;
             color: #fff;
-            line-height: 1.2; /* Mengatur jarak antar baris teks agar lebih rapi */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            margin-top: 10px; /* Sedikit penyesuaian vertikal agar lebih pas */
+            line-height: 1.2;
+            display: block;
         }
-        .navbar-nav .nav-link {
-            color: #d4ffe9 !important;
-            font-weight: 500;
-            margin-right: 15px;
-            opacity: 0.89;
+        .brand-subtitle {
+            font-size: 0.80rem;
+            opacity: 0.8;
+            margin-top: -4px;
+            display: block;
         }
-        .navbar-nav .nav-link.active, .navbar-nav .nav-link:hover {
+        .nav-link {
+            font-weight: 600;
+            color: rgba(255,255,255,0.85) !important;
+            margin-left: 20px;
+            transition: 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
             color: #fff !important;
-            text-decoration: underline;
-            opacity: 1;
+            transform: translateY(-2px);
         }
         @media (max-width: 800px) {
             .brand-title { font-size: 1rem; }
-            .brand-logo img { width: 45px; } /* Ukuran sedikit disesuaikan agar tetap terlihat proporsional di HP */
+            .brand-logo img { width: 45px; height: 35px; }
         }
         .container-main {
             padding-top: 68px;
@@ -73,20 +71,20 @@ if (session_status() == PHP_SESSION_NONE) {
     </style>
 </head>
 <body>
-<nav class="navbar main-navbar navbar-expand-lg">
+<nav class="navbar navbar-expand-lg main-navbar navbar-dark sticky-top">
     <div class="container">
         <div class="brand-logo">
             <img src="assets/logo-ikpm2.png" alt="Logo IKPM Gontor" />
             <div class="brand-title">
-                <span>Ikatan Keluarga Pondok Modern</span>
-                <span style="font-size:.85rem;font-weight:400;">Sulawesi Selatan & Sulawesi Barat</span>
+                <span>Ikatan Keluarga Pondok Modern Gontor</span>
+                <span class="brand-subtitle">Sulawesi Selatan & Sulawesi Barat</span>
             </div>
         </div>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavMain">
+        <button class="navbar-toggler border-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavMain">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarNavMain">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav align-items-center">
                 <li class="nav-item"><a class="nav-link<?= ($_SERVER['SCRIPT_NAME']=='/index.php'?' active':'') ?>" href="index.php">Beranda</a></li>
                 <?php if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true): ?>
                     <li class="nav-item"><a class="nav-link" href="dashboard_alumni.php"><i class="bi bi-house-door"></i> Dashboard</a></li>
@@ -97,7 +95,7 @@ if (session_status() == PHP_SESSION_NONE) {
                     <li class="nav-item"><a class="nav-link" href="login.php"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
                     <li class="nav-item"><a class="nav-link" href="berita.php"><i class="bi bi-newspaper"></i> Berita</a></li>
                     <li class="nav-item"><a class="nav-link" href="register.php"><i class="bi bi-pencil-square"></i> Registrasi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="admin/login_admin.php"><i class="bi bi-shield-lock"></i> Admin</a></li>
+                    <li class="nav-item"><a class="btn btn-light ms-lg-3 text-success fw-bold px-4 rounded-pill" href="admin/login_admin.php">Admin</a></li>
                 <?php endif; ?>
             </ul>
         </div>

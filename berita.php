@@ -19,50 +19,45 @@
             overflow-x: hidden;
         }
         .main-navbar {
-            background: transparent;
-            box-shadow: none;
-            padding-top: 20px;
-            padding-bottom: 0;
-            z-index: 2;
-            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            z-index: 1050;
         }
         .brand-logo {
             display: flex;
             align-items: center;
         }
         .brand-logo img {
-            width: 80px; 
-            height: auto;
-            margin-right: 15px;
-        }
-        .brand-title-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            margin-top: 15px;
+            width: 65px;
+            height: 50px;
+            margin-right: 8px;
+            top: -8px;
+            position: relative;
         }
         .brand-title {
-            font-weight: 700;
-            font-size: 1.25rem;
-            letter-spacing: .5px;
+            font-weight: 800;
+            font-size: 1.1rem;
             line-height: 1.2;
             color: #fff;
+            display: block;
         }
         .brand-subtitle {
-            font-size: 0.85rem;
-            font-weight: 400;
-            color: #e4ffe6;
+            font-size: 0.80rem;
+            opacity: 0.8;
+            margin-top: -4px;
+            display: block;
         }
-        .main-nav .nav-link {
-            color: #e4ffe6 !important;
-            font-weight: 500;
-            margin-right: 18px;
-            opacity: 0.88;
+        .nav-link {
+            font-weight: 600;
+            color: rgba(255,255,255,0.85) !important;
+            margin-left: 20px;
+            transition: 0.3s;
         }
-        .main-nav .nav-link.active, .main-nav .nav-link:hover {
+        .nav-link:hover, .nav-link.active {
             color: #fff !important;
-            text-decoration: underline;
-            opacity: 1;
+            transform: translateY(-2px);
         }
 
         .news-wrap {
@@ -205,30 +200,37 @@
                 min-height: auto;
                 -webkit-line-clamp: 5;
             }
+            .brand-title {
+                font-size: 1rem;
+            }
+            .brand-logo img {
+                width: 45px;
+                height: 35px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar main-navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg main-navbar navbar-dark sticky-top">
         <div class="container">
             <div class="brand-logo">
                 <img src="assets/logo-ikpm2.png" alt="Logo IKPM" />
-                <div class="brand-title-container">
-                    <span class="brand-title">Ikatan Keluarga Pondok Modern</span>
+                <div>
+                    <span class="brand-title">Ikatan Keluarga Pondok Modern Gontor</span>
                     <span class="brand-subtitle">Sulawesi Selatan & Sulawesi Barat</span>
                 </div>
             </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse justify-content-end main-nav" id="navbarNav">
-                <ul class="navbar-nav">
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
                     <li class="nav-item"><a class="nav-link" href="index.php">Beranda</a></li>
                     <li class="nav-item"><a class="nav-link active" href="berita.php">Berita</a></li>
                     <li class="nav-item"><a class="nav-link" href="login.php">Login Alumni</a></li>
                     <li class="nav-item"><a class="nav-link" href="register.php">Registrasi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="admin/login_admin.php">Admin</a></li>
+                    <li class="nav-item"><a class="btn btn-light ms-lg-3 text-success fw-bold px-4 rounded-pill" href="admin/login_admin.php">Admin</a></li>
                 </ul>
             </div>
         </div>
