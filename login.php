@@ -3,31 +3,35 @@ session_start();
 
 // Jika sudah login, redirect ke dashboard alumni
 if (isset($_SESSION['id_alumni'])) {
-    header("Location: dashboard_alumni.php");
+    header('Location: dashboard_alumni.php');
     exit();
 }
-$title = "Tracer Alumni | IKPM Gontor";
+
+$title = 'Tracer Alumni | IKPM Gontor';
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login Alumni - Tracer Alumni | IKPM Gontor</title>
     <link rel="icon" type="image/png" href="assets/logo-ikpm2.png">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Tracer Alumni | Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
         body {
             min-height: 100vh;
             margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'Inter', sans-serif;
             color: #1f2937;
             background: linear-gradient(135deg, #1abc9c 0%, #27ae60 100%);
-            position: relative;
             overflow-x: hidden;
+            position: relative;
         }
         body::before,
         body::after {
@@ -54,339 +58,201 @@ $title = "Tracer Alumni | IKPM Gontor";
             background: radial-gradient(circle, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 72%);
         }
         .login-shell {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: min(100%, 540px);
             padding: 24px;
             position: relative;
             z-index: 1;
         }
         .login-card {
-            width: min(100%, 1020px);
-            min-height: 600px;
-            display: grid;
-            grid-template-columns: 1.05fr 0.95fr;
-            border-radius: 28px;
+            min-height: 0;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 24px;
             overflow: hidden;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            box-shadow: 0 24px 60px rgba(10, 60, 30, 0.2);
-            backdrop-filter: blur(10px);
-        }
-        .login-visual {
-            position: relative;
-            padding: 44px;
-            background: linear-gradient(160deg, rgba(19, 121, 72, 0.98), rgba(26, 188, 156, 0.9));
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-        }
-        .login-visual::before {
-            content: '';
-            position: absolute;
-            inset: auto -60px -120px auto;
-            width: 260px;
-            height: 260px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.08);
-        }
-        .login-visual::after {
-            content: '';
-            position: absolute;
-            top: 36px;
-            right: 36px;
-            width: 120px;
-            height: 120px;
-            border-radius: 28px;
-            border: 1px solid rgba(255,255,255,0.14);
-            transform: rotate(14deg);
-        }
-        .brand-block,
-        .login-points {
-            position: relative;
-            z-index: 1;
-        }
-        .brand-logo-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-        .brand-logo-row img {
-            width: 66px;
-            height: 66px;
-            object-fit: contain;
-        }
-        .brand-kicker {
-            font-size: 0.85rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            opacity: 0.82;
-            margin-bottom: 8px;
-        }
-        .brand-title {
-            font-size: 2.1rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 12px;
-        }
-        .brand-desc {
-            max-width: 420px;
-            line-height: 1.75;
-            color: #ecffef;
-            margin-bottom: 0;
-        }
-        .visual-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            width: fit-content;
-            margin-top: 22px;
-            padding: 10px 16px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #f4fff6;
-            font-weight: 600;
-        }
-        .login-points {
-            display: grid;
-            gap: 14px;
-        }
-        .point-text {
-            font-size: 0.95rem;
-            line-height: 1.7;
-            color: rgba(255, 255, 255, 0.92);
-            margin: 0;
+            box-shadow: 0 18px 44px rgba(10, 60, 30, 0.16);
+            backdrop-filter: blur(8px);
         }
         .login-form-panel {
-            padding: 46px 40px;
+            padding: 28px;
             background: rgba(255, 255, 255, 0.98);
-            display: flex;
-            align-items: center;
         }
-        .login-box {
-            width: 100%;
-        }
-        .login-head {
-            margin-bottom: 20px;
-        }
-        .login-logo {
+        .brand-inline {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
-        .login-logo img {
-            width: 48px;
-            height: 48px;
+        .brand-logo {
+            width: 58px;
+            height: 58px;
             object-fit: contain;
+            flex: 0 0 auto;
+            filter: drop-shadow(0 4px 8px rgba(25, 121, 72, 0.22));
+            
+            /* Tambahkan dua baris di bawah ini */
+            transform: translateY(-10px); /* Angka minus (-) untuk geser ke atas */
+            margin-left: 10px;           /* Angka positif untuk geser ke kanan */
+        }
+        .org-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.4;
+            margin: 0;
+            color: #154d30;
+        }
+        .org-region {
+            margin: 2px 0 0;
+            font-size: 0.78rem;
+            color: #5f7d6d;
+            letter-spacing: 0.04em;
         }
         .login-title {
+            font-size: 1.35rem;
             font-weight: 800;
-            font-size: 2rem;
-            margin-bottom: 8px;
+            line-height: 1.25;
+            margin: 0 0 6px;
+            color: #154d30;
+            text-align: center;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            border-radius: 12px;
             color: #197948;
-        }
-        .login-desc {
-            color: #64748b;
-            margin-bottom: 0;
-            font-size: 1rem;
-            line-height: 1.7;
-        }
-        .form-label {
+            text-decoration: none;
             font-weight: 600;
-            color: #334155;
+            background: rgba(25, 121, 72, 0.07);
+            border: 1px solid rgba(25, 121, 72, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #155c29;
+            background: rgba(25, 121, 72, 0.12);
+            border-color: rgba(25, 121, 72, 0.22);
+            transform: translateY(-1px);
         }
         .form-control {
             border-radius: 14px;
             border: 1px solid #d8e7dd;
             padding: 0.85rem 1rem;
         }
-        .form-control:focus {
-            border-color: #197948;
-            box-shadow: 0 0 0 0.2rem rgba(25, 121, 72, 0.16);
-        }
-        .input-group .btn {
-            border-radius: 0 14px 14px 0;
-        }
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 18px;
-            color: #197948;
-            text-decoration: none;
-            font-weight: 700;
-        }
-        .back-link:hover {
-            color: #155c29;
-        }
-        .btn-green {
+        .form-control:focus { border-color: #197948; box-shadow: 0 0 0 0.2rem rgba(25, 121, 72, 0.18); }
+        .input-group .btn { border-radius: 0 14px 14px 0; }
+        .btn-success {
             background: linear-gradient(135deg, #197948, #2eac68);
-            border: 0;
-            color: #fff;
-            font-weight: 700;
-            padding: 12px 0;
+            border-color: #197948;
             border-radius: 14px;
-            font-size: 1.05rem;
-            box-shadow: 0 10px 22px rgba(25, 121, 72, 0.18);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 22px rgba(25, 121, 72, 0.18);
         }
-        .btn-green:hover {
+        .btn-success:hover {
             background: linear-gradient(135deg, #155c29, #24995a);
-            color: #fff;
             transform: translateY(-2px);
             box-shadow: 0 14px 28px rgba(25, 121, 72, 0.22);
         }
-        .login-links {
-            color: #64748b;
-        }
-        .login-links a {
-            color: #197948;
-            font-weight: 700;
-            text-decoration: none;
-        }
-        .login-links a:hover {
-            color: #155c29;
-            text-decoration: underline;
-        }
-        .alert {
-            border-radius: 14px;
-        }
-        @media (max-width: 991.98px) {
-            .login-shell { padding: 16px; }
-            .login-card {
-                grid-template-columns: 1fr;
-                min-height: auto;
-            }
-            .login-visual {
-                padding: 32px 24px;
-            }
-            .login-form-panel {
-                padding: 32px 24px 36px;
-            }
-            .brand-title {
-                font-size: 1.7rem;
-            }
-        }
+        .alert { border-radius: 14px; }
+        .login-links a { color: #197948; text-decoration: none; font-weight: 700; }
+        .login-links a:hover { text-decoration: underline; }
+        
         @media (max-width: 575.98px) {
-            .login-shell { padding: 12px; }
-            .login-visual { padding: 26px 20px; }
-            .login-form-panel { padding: 24px 18px 28px; }
-            .brand-logo-row { align-items: flex-start; }
-            .brand-title { font-size: 1.45rem; }
-            .login-title { font-size: 1.5rem; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation: none !important;
-                transition: none !important;
-                scroll-behavior: auto !important;
-            }
+            .org-name { font-size: 0.95rem; }
+            .org-region { font-size: 0.72rem; }
+            .login-title { font-size: 1.2rem; }
+            .back-link { width: 100%; justify-content: center; }
         }
     </style>
-    <script>
-    function togglePassword(fieldId, btn) {
-        const input = document.getElementById(fieldId);
-        if (input.type === "password") {
-            input.type = "text";
-            btn.querySelector('span').classList.remove('bi-eye');
-            btn.querySelector('span').classList.add('bi-eye-slash');
-        } else {
-            input.type = "password";
-            btn.querySelector('span').classList.remove('bi-eye-slash');
-            btn.querySelector('span').classList.add('bi-eye');
-        }
-    }
-    </script>
 </head>
 <body>
-<div class="login-shell">
-    <div class="login-card">
-        <section class="login-visual d-none d-lg-flex">
-            <div class="brand-block">
-                <div class="brand-logo-row">
-                    <img src="assets/logo-ikpm2.png" alt="Logo Kampus" />
-                    <div>
-                        <div class="brand-kicker">Tracer Alumni IKPM Gontor</div>
-                        <div class="brand-title">Login Alumni</div>
-                    </div>
-                </div>
-                <p class="brand-desc">Masuk untuk mengakses dashboard alumni, memperbarui profil, serta mengisi kuesioner tracer study.</p>
-                <div class="visual-chip"><i class="bi bi-shield-lock-fill"></i> Akses aman dan terintegrasi</div>
-            </div>
-            <div class="login-points">
-                <p class="point-text">Pantau data diri, pekerjaan, dan perkembangan alumni dalam satu tempat yang sederhana dan jelas.</p>
-            </div>
-        </section>
-
-        <section class="login-form-panel">
-            <div class="login-box">
-                <a href="index.php" class="back-link"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
-
-                <div class="login-head">
-                    <div class="login-logo">
-                        <img src="assets/logo-ikpm2.png" alt="Logo Kampus" />
+    <div class="login-shell">
+        <div class="login-card">
+            <section class="login-form-panel">
+                <div class="login-box">
+                    <a href="index.php" class="back-link"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+                    
+                    <div class="brand-inline">
+                        <img src="assets/logo-ikpm2.png" alt="Logo IKPM" class="brand-logo"/>
                         <div>
-                            <div class="fw-bold text-success">Tracer Alumni</div>
-                            <div class="small text-muted">IKPM Gontor</div>
+                            <p class="org-name">Ikatan Keluarga Pondok Modern Gontor</p>
+                            <p class="org-region">Sulawesi Selatan dan Sulawesi Barat</p>
                         </div>
                     </div>
-                    <div class="login-title">Login Alumni</div>
-                    <p class="login-desc">Masukkan username dan password untuk masuk ke dashboard alumni.</p>
-                </div>
 
-                <?php
-                if (isset($_GET['success']) && $_GET['success'] == 'register') {
-                    echo '<div class="alert alert-success">Registrasi berhasil! Silakan login.</div>';
-                }
-                if (isset($_GET['error'])) {
-                    echo '<div class="alert alert-danger">';
-                    if ($_GET['error'] == 'wrong_credentials') {
-                        echo 'NIM/Email atau Password salah!';
-                    } elseif ($_GET['error'] == 'empty_fields') {
-                        echo 'Mohon isi semua field dengan lengkap!';
-                    } else {
-                        echo 'Terjadi kesalahan, silakan coba lagi!';
-                    }
-                    echo '</div>';
-                }
-                if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
-                    echo '<div class="alert alert-info">Anda berhasil logout.</div>';
-                }
-                ?>
+                    <h1 class="login-title">Login Alumni</h1>
 
-                <form action="proses_login.php" method="POST" autocomplete="off">
-                    <div class="mb-3">
-                        <label for="nim_email" class="form-label">Username</label>
-                        <input type="text" id="nim_email" name="nim_email" class="form-control" required autofocus placeholder="Masukkan username/NIW" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <div class="input-group">
-                            <input type="password" id="password" name="password" class="form-control" required placeholder="Masukkan password" />
-                            <button type="button" class="btn btn-outline-secondary" tabindex="-1" onclick="togglePassword('password', this)" aria-label="Tampilkan/Sembunyikan Password">
-                                <span class="bi bi-eye"></span>
-                            </button>
+                    <?php if (isset($_GET['success']) && $_GET['success'] == 'register'): ?>
+                        <div class="alert alert-success alert-dismissible fade show small" role="alert">
+                            Registrasi berhasil! Silakan login.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                    </div>
-                    <button type="submit" class="btn btn-green w-100 my-3">Login</button>
-                </form>
+                    <?php endif; ?>
 
-                <div class="mt-2 text-center small login-links">
-                    Belum punya akun? <a href="register.php">Daftar di sini</a>
-                    <br>
-                    <a href="index.php">← Kembali ke Beranda</a>
+                    <?php if (isset($_GET['error'])): ?>
+                        <div class="alert alert-danger alert-dismissible fade show small" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <?php
+                            if ($_GET['error'] == 'wrong_credentials') echo 'NIM/Email atau Password salah!';
+                            elseif ($_GET['error'] == 'empty_fields') echo 'Mohon isi semua field dengan lengkap!';
+                            else echo 'Terjadi kesalahan, silakan coba lagi!';
+                            ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (isset($_GET['logout']) && $_GET['logout'] == 'success'): ?>
+                        <div class="alert alert-info alert-dismissible fade show small" role="alert">
+                            Anda berhasil logout.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <?php endif; ?>
+
+                    <form action="proses_login.php" method="POST" autocomplete="off">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Username</label>
+                            <input type="text" name="nim_email" class="form-control" required autofocus placeholder="Masukkan username/NIW" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" class="form-control" required placeholder="Masukkan password" />
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
+                                    <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-semibold py-2 mt-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Masuk Sekarang
+                        </button>
+                    </form>
+
+                    <div class="mt-4 text-center small login-links">
+                        Belum punya akun? <a href="register.php">Daftar di sini</a>
+                    </div>
                 </div>
-            
-            </div>
+            </section>
         </div>
-</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const passwordInput = document.getElementById('password');
+        const toggleBtn = document.getElementById('togglePassword');
+        const toggleIcon = document.getElementById('togglePasswordIcon');
+        
+        if (passwordInput && toggleBtn) {
+            toggleBtn.addEventListener('click', function () {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                toggleIcon.classList.toggle('bi-eye');
+                toggleIcon.classList.toggle('bi-eye-slash');
+            });
+        }
+    });
+    </script>
 </body>
 </html>

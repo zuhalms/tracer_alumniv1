@@ -30,10 +30,15 @@ if (session_status() == PHP_SESSION_NONE) {
             display: flex;
             align-items: center; 
         }
-        .brand-logo img {
-            width: 70px;
-            height: auto;
-            margin-right: 15px; /* Jarak antara logo dan teks */
+        /* Update bagian ini di dalam tag <style> */
+        .brand-logo img { 
+            width: 60px; 
+            height: auto; 
+            margin-right: 20px; /* Ditambah agar teks di sampingnya lebih berjarak ke kanan */
+            
+            /* Tambahkan dua baris di bawah ini */
+            transform: translateY(-10px); /* Angka minus untuk menggeser ke ATAS */
+            margin-left: 10px;           /* Angka positif untuk menggeser ke KANAN */
         }
         .brand-title {
             font-weight: 700;

@@ -79,10 +79,7 @@ $password = trim($_POST['password']); // Fungsi trim() ini penting untuk hapus s
             justify-content: center;
             font-family: 'Inter', sans-serif;
             color: #1f2937;
-            background:
-                radial-gradient(circle at 15% 15%, rgba(255,255,255,0.22), transparent 34%),
-                radial-gradient(circle at 90% 85%, rgba(255,255,255,0.14), transparent 30%),
-                linear-gradient(145deg, #1f7348 0%, #2f9e68 55%, #1c5b38 100%);
+            background: linear-gradient(135deg, #1abc9c 0%, #27ae60 100%);
             overflow-x: hidden;
             position: relative;
         }
@@ -92,22 +89,23 @@ $password = trim($_POST['password']); // Fungsi trim() ini penting untuk hapus s
             position: fixed;
             border-radius: 50%;
             pointer-events: none;
-            opacity: 0.12;
-            filter: blur(4px);
+            opacity: 0.16;
+            filter: blur(8px);
+            z-index: 0;
         }
         body::before {
-            width: 260px;
-            height: 260px;
-            top: -90px;
-            right: -90px;
-            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+            width: 360px;
+            height: 360px;
+            top: -120px;
+            right: -100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%);
         }
         body::after {
-            width: 200px;
-            height: 200px;
-            left: -70px;
-            bottom: -70px;
-            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 72%);
+            width: 280px;
+            height: 280px;
+            left: -90px;
+            bottom: -100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 72%);
         }
         .login-shell {
             width: min(100%, 540px);
@@ -143,6 +141,10 @@ $password = trim($_POST['password']); // Fungsi trim() ini penting untuk hapus s
             object-fit: contain;
             flex: 0 0 auto;
             filter: drop-shadow(0 4px 8px rgba(25, 121, 72, 0.22));
+            
+            /* Tambahkan dua baris di bawah ini */
+            transform: translateY(-10px); /* Angka minus (-) untuk geser ke atas */
+            margin-left: 10px;           /* Angka positif untuk geser ke kanan */
         }
         .org-name {
             font-size: 1.1rem;
